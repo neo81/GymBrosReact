@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Sora:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Bebas Neue", sans-serif;
+  
+  --color-bg: #0F0F1A;
+  --color-bg-soft: #16162A;
+  --color-bg-card: #1E1E35;
+  --color-accent: #6C63FF;
+  --color-accent-light: #8B84FF;
+  --color-danger: #FF5C7A;
+  --color-success: #4DFFA0;
+}
+
+@layer base {
+  body {
+    @apply bg-bg text-white antialiased;
+  }
+}
+
+.orb-float {
+  animation: orbFloat 8s ease-in-out infinite alternate;
+}
+
+@keyframes orbFloat {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(20px, 30px) scale(1.1); }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.05); }
+}
+
+.animate-bob {
+  animation: bob 2s ease-in-out infinite;
+}

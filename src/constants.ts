@@ -1,0 +1,141 @@
+import { Exercise } from './types';
+
+export const MUSCLES_FRONT = [
+  { id: 'hombros',    label: 'Hombros',    cx: 95,  cy: 105, r: 10 },
+  { id: 'biceps',     label: 'Bíceps',     cx: 75,  cy: 155, r: 10 },
+  { id: 'antebrazo',  label: 'Antebrazo',  cx: 60,  cy: 185, r: 10 },
+  { id: 'pectorales', label: 'Pectorales', cx: 195, cy: 115, r: 10 },
+  { id: 'oblicuos',   label: 'Oblicuos',   cx: 200, cy: 190, r: 10 },
+  { id: 'abdomen',    label: 'Abdomen',    cx: 160, cy: 175, r: 10 },
+  { id: 'abductores', label: 'Abductores', cx: 125, cy: 270, r: 10 },
+  { id: 'cuadriceps', label: 'Cuádriceps', cx: 135, cy: 340, r: 10 },
+  { id: 'aductores',  label: 'Aductores',  cx: 185, cy: 290, r: 10 },
+];
+
+export const MUSCLES_BACK = [
+  { id: 'triceps',        label: 'Tríceps',         cx: 85,  cy: 160, r: 10 },
+  { id: 'lumbares',       label: 'Lumbares',        cx: 160, cy: 200, r: 10 },
+  { id: 'isquiotibiales', label: 'Isquiotibiales',  cx: 145, cy: 330, r: 10 },
+  { id: 'pantorrillas',   label: 'Pantorrillas',    cx: 145, cy: 380, r: 10 },
+  { id: 'trapecio',       label: 'Trapecio',       cx: 160, cy: 85,  r: 10 },
+  { id: 'dorsales',       label: 'Dorsales',        cx: 195, cy: 145, r: 10 },
+  { id: 'gluteos',        label: 'Glúteos',         cx: 175, cy: 245, r: 10 },
+];
+
+export const ALL_MUSCLES = [...MUSCLES_FRONT, ...MUSCLES_BACK];
+
+export const EXERCISES_DB: { [key: string]: Exercise[] } = {
+  hombros: [
+    { id: 'e_hom_1', name: 'Elevación Lateral (mancuernas)', emoji: '🏋️', muscles: ['Hombros','Trapecio'], desc: 'Trabaja el deltoides lateral. Eleva los brazos hasta la altura de los hombros manteniendo leve flexión.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_hom_2', name: 'Press Militar Sentado (mancuernas)', emoji: '💪', muscles: ['Hombros','Tríceps'], desc: 'Ejercicio compuesto para deltoides anterior y lateral. Empuja hacia arriba extendiendo completamente los codos.' },
+    { id: 'e_hom_3', name: 'Press Militar (barra)', emoji: '🔱', muscles: ['Hombros','Trapecio','Tríceps'], desc: 'Movimiento compuesto de empuje vertical. Uno de los mejores para masa en hombros.' },
+    { id: 'e_hom_4', name: 'Elevación Frontal (mancuernas)', emoji: '⬆️', muscles: ['Hombros'], desc: 'Aísla el deltoides anterior. Eleva el brazo extendido hasta la altura del hombro.' },
+    { id: 'e_hom_5', name: 'Pájaros con Mancuernas', emoji: '🕊️', muscles: ['Hombros','Dorsales'], desc: 'Trabaja el deltoides posterior con el torso inclinado hacia adelante.' },
+    { id: 'e_hom_6', name: 'Face Pulls (polea)', emoji: '🎭', muscles: ['Hombros','Trapecio'], desc: 'Excelente para la salud del hombro y deltoides posterior. Tira de la cuerda hacia tu cara separando los extremos.' },
+    { id: 'e_hom_7', name: 'Press Arnold', emoji: '🕶️', muscles: ['Hombros','Tríceps'], desc: 'Variación del press militar que incluye una rotación de muñecas para trabajar todas las cabezas del deltoides.' },
+  ],
+  pectorales: [
+    { id: 'e_pec_1', name: 'Press de Banca Plano (barra)', emoji: '🏋️', muscles: ['Pectorales','Tríceps','Hombros'], desc: 'El rey del pecho. Empuja la barra desde el pecho hasta extensión completa de codos.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_pec_2', name: 'Aperturas con Mancuernas', emoji: '🦋', muscles: ['Pectorales'], desc: 'Aísla el pecho. Baja las mancuernas en arco manteniendo leve flexión en codos.' },
+    { id: 'e_pec_3', name: 'Press Inclinado (mancuernas)', emoji: '📐', muscles: ['Pectorales','Hombros'], desc: 'Enfoca el pecho superior. Banco a 30-45 grados.' },
+    { id: 'e_pec_4', name: 'Fondos en Paralelas', emoji: '↕️', muscles: ['Pectorales','Tríceps'], desc: 'Ejercicio con peso corporal. Inclina el torso para mayor activación pectoral.' },
+    { id: 'e_pec_5', name: 'Cruce de Poleas', emoji: '✖️', muscles: ['Pectorales'], desc: 'Excelente para la contracción final del pecho. Cruza las manos en el centro.' },
+    { id: 'e_pec_6', name: 'Flexiones de Brazo', emoji: '🤸', muscles: ['Pectorales','Tríceps','Hombros'], desc: 'Ejercicio básico de peso corporal. Mantén el cuerpo recto como una tabla.' },
+    { id: 'e_pec_7', name: 'Press de Banca Declinado', emoji: '📉', muscles: ['Pectorales','Tríceps'], desc: 'Enfoca la parte inferior del pectoral.' },
+  ],
+  biceps: [
+    { id: 'e_bic_1', name: 'Curl Bíceps (barra)', emoji: '💪', muscles: ['Bíceps','Antebrazo'], desc: 'Ejercicio básico y efectivo. Mantén los codos pegados al cuerpo.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_bic_2', name: 'Curl Martillo (mancuernas)', emoji: '🔨', muscles: ['Bíceps','Antebrazo'], desc: 'Agarre neutro. Trabaja bíceps braquial y braquiorradial.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_bic_3', name: 'Curl Concentrado', emoji: '🎯', muscles: ['Bíceps'], desc: 'Máximo aislamiento del bíceps. Apoya el codo en el muslo interno.' },
+    { id: 'e_bic_4', name: 'Curl en Polea Baja', emoji: '🔗', muscles: ['Bíceps'], desc: 'Tensión constante durante todo el recorrido gracias a la polea.' },
+    { id: 'e_bic_5', name: 'Curl Predicador', emoji: '⛪', muscles: ['Bíceps'], desc: 'Evita el balanceo apoyando los brazos en el banco Scott.' },
+    { id: 'e_bic_6', name: 'Curl Inverso (barra)', emoji: '🔄', muscles: ['Antebrazo','Bíceps'], desc: 'Trabaja el braquiorradial y los extensores de la muñeca.' },
+  ],
+  triceps: [
+    { id: 'e_tri_1', name: 'Extensión en Polea Alta', emoji: '📉', muscles: ['Tríceps'], desc: 'Empuja el cable hacia abajo extendiendo el codo completamente.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_tri_2', name: 'Press Francés (mancuernas)', emoji: '🗼', muscles: ['Tríceps'], desc: 'Flexiona el codo trayendo las mancuernas hacia la frente, luego extiende.' },
+    { id: 'e_tri_3', name: 'Fondos en Banco', emoji: '🪑', muscles: ['Tríceps','Pectorales'], desc: 'Peso corporal. Baja el cuerpo flexionando los codos.' },
+    { id: 'e_tri_4', name: 'Copa (mancuerna)', emoji: '🏆', muscles: ['Tríceps'], desc: 'Agarra la mancuerna con ambas manos, extiende y flexiona detrás de la cabeza.' },
+    { id: 'e_tri_5', name: 'Patada de Tríceps', emoji: '🐎', muscles: ['Tríceps'], desc: 'Extiende el brazo hacia atrás manteniendo el brazo paralelo al suelo.' },
+    { id: 'e_tri_6', name: 'Press de Banca Agarre Cerrado', emoji: '📏', muscles: ['Tríceps','Pectorales'], desc: 'Variación del press de banca que enfatiza el tríceps.' },
+  ],
+  dorsales: [
+    { id: 'e_dor_1', name: 'Dominadas (agarre ancho)', emoji: '🔝', muscles: ['Dorsales','Bíceps'], desc: 'Jala tu peso corporal. Agarre amplio enfoca la amplitud dorsal.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_dor_2', name: 'Remo con Barra', emoji: '🚣', muscles: ['Dorsales','Bíceps','Trapecio'], desc: 'Torso inclinado. Tira la barra hacia el abdomen bajo.' },
+    { id: 'e_dor_3', name: 'Jalón al Pecho (polea alta)', emoji: '⬇️', muscles: ['Dorsales','Bíceps'], desc: 'Alternativa a dominadas. Jala la barra hacia el pecho.' },
+    { id: 'e_dor_4', name: 'Remo con Mancuerna', emoji: '🏋️', muscles: ['Dorsales','Bíceps'], desc: 'Apoyo en banco. Gran rango de movimiento.' },
+    { id: 'e_dor_5', name: 'Pull-over con Polea Alta', emoji: '🎣', muscles: ['Dorsales','Tríceps'], desc: 'Aísla el dorsal. Brazos casi extendidos, tira hacia los muslos.' },
+    { id: 'e_dor_6', name: 'Remo en T', emoji: '⚓', muscles: ['Dorsales','Bíceps','Trapecio'], desc: 'Ejercicio clásico para densidad de espalda.' },
+  ],
+  trapecio: [
+    { id: 'e_tra_1', name: 'Remo Vertical (barra)', emoji: '⬆️', muscles: ['Trapecio','Hombros','Bíceps'], desc: 'Tira la barra hacia el mentón con agarre estrecho.' },
+    { id: 'e_tra_2', name: 'Encogimientos (barra)', emoji: '🔼', muscles: ['Trapecio'], desc: 'Eleva los hombros en línea recta hacia las orejas.' },
+    { id: 'e_tra_3', name: 'Encogimientos (mancuernas)', emoji: '💎', muscles: ['Trapecio'], desc: 'Mayor rango de movimiento que con barra.' },
+    { id: 'e_tra_4', name: 'Face Pulls', emoji: '🎭', muscles: ['Trapecio','Hombros'], desc: 'También trabaja el trapecio medio e inferior.' },
+  ],
+  abdomen: [
+    { id: 'e_abd_1', name: 'Crunchs en Suelo', emoji: '🔄', muscles: ['Abdomen'], desc: 'Contracción abdominal clásica. Lleva las costillas hacia las caderas.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_abd_2', name: 'Plancha Frontal', emoji: '➡️', muscles: ['Abdomen','Lumbares'], desc: 'Isométrico fundamental. Mantén cadera neutra.' },
+    { id: 'e_abd_3', name: 'Rueda Abdominal', emoji: '⚙️', muscles: ['Abdomen','Dorsales','Hombros'], desc: 'Ejercicio avanzado. Extiende el cuerpo controladamente.' },
+    { id: 'e_abd_4', name: 'Elevación de Piernas Colgado', emoji: '🪝', muscles: ['Abdomen'], desc: 'Trabaja especialmente el abdomen inferior.' },
+    { id: 'e_abd_5', name: 'Bicicleta Abdominal', emoji: '🚲', muscles: ['Abdomen','Oblicuos'], desc: 'Toca codo con rodilla contraria alternadamente.' },
+    { id: 'e_abd_6', name: 'V-Ups', emoji: '✌️', muscles: ['Abdomen'], desc: 'Eleva torso y piernas simultáneamente para formar una V.' },
+  ],
+  oblicuos: [
+    { id: 'e_obl_1', name: 'Crunchs Laterales', emoji: '↗️', muscles: ['Oblicuos'], desc: 'Inclínate hacia los lados de forma controlada.' },
+    { id: 'e_obl_2', name: 'Plancha Lateral', emoji: '📏', muscles: ['Oblicuos','Abdomen'], desc: 'Isométrico de gran efectividad.' },
+    { id: 'e_obl_3', name: 'Rotación con Polea', emoji: '🌀', muscles: ['Oblicuos','Abdomen'], desc: 'Rota el torso contra la resistencia de la polea.' },
+    { id: 'e_obl_4', name: 'Ruso (Russian Twist)', emoji: '🇷🇺', muscles: ['Oblicuos','Abdomen'], desc: 'Sentado, rota el torso de lado a lado con o sin peso.' },
+  ],
+  lumbares: [
+    { id: 'e_lum_1', name: 'Hiperextensiones', emoji: '🔙', muscles: ['Lumbares','Glúteos'], desc: 'En el banco romano, extiende la cadera.' },
+    { id: 'e_lum_2', name: 'Buenos Días (barra)', emoji: '🌅', muscles: ['Lumbares','Isquiotibiales','Glúteos'], desc: 'Inclina el torso con la barra en hombros.' },
+    { id: 'e_lum_3', name: 'Peso Muerto Rumano', emoji: '🏗️', muscles: ['Lumbares','Isquiotibiales','Glúteos'], desc: 'Bisagra de cadera con piernas semirrectas.' },
+    { id: 'e_lum_4', name: 'Superman', emoji: '🦸', muscles: ['Lumbares'], desc: 'Tumbado boca abajo, eleva brazos y piernas simultáneamente.' },
+  ],
+  gluteos: [
+    { id: 'e_glu_1', name: 'Hip Thrust (barra)', emoji: '🍑', muscles: ['Glúteos','Isquiotibiales'], desc: 'El mejor ejercicio para glúteos. Empuja la cadera hacia arriba.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_glu_2', name: 'Sentadilla Búlgara', emoji: '🎯', muscles: ['Glúteos','Cuádriceps'], desc: 'Pie trasero elevado. Gran activación unilateral.' },
+    { id: 'e_glu_3', name: 'Patada Trasera en Polea', emoji: '🦵', muscles: ['Glúteos'], desc: 'Extiende la cadera hacia atrás contra la resistencia.' },
+    { id: 'e_glu_4', name: 'Peso Muerto Convencional', emoji: '🏋️', muscles: ['Glúteos','Isquiotibiales','Lumbares'], desc: 'Rey de la cadena posterior. Espalda recta, empuja el piso.' },
+    { id: 'e_glu_5', name: 'Abducción de Cadera (polea)', emoji: '↔️', muscles: ['Glúteos','Abductores'], desc: 'Lleva la pierna hacia afuera lateralmente.' },
+    { id: 'e_glu_6', name: 'Clamshells', emoji: '🐚', muscles: ['Glúteos'], desc: 'Tumbado de lado, abre las rodillas manteniendo los pies juntos.' },
+  ],
+  cuadriceps: [
+    { id: 'e_cua_1', name: 'Sentadilla Libre (barra)', emoji: '👑', muscles: ['Cuádriceps','Glúteos','Isquiotibiales'], desc: 'El rey de los ejercicios de pierna.', gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' },
+    { id: 'e_cua_2', name: 'Extensión de Piernas', emoji: '⬆️', muscles: ['Cuádriceps'], desc: 'Aísla el cuádriceps. Extiende completamente la rodilla.' },
+    { id: 'e_cua_3', name: 'Prensa de Piernas', emoji: '🔩', muscles: ['Cuádriceps','Glúteos'], desc: 'Gran volumen de carga.' },
+    { id: 'e_cua_4', name: 'Zancadas (mancuernas)', emoji: '🚶', muscles: ['Cuádriceps','Glúteos'], desc: 'Unilateral. Excelente para balance y desarrollo funcional.' },
+    { id: 'e_cua_5', name: 'Sentadilla Hack', emoji: '🚜', muscles: ['Cuádriceps','Glúteos'], desc: 'Variación de sentadilla que permite mayor enfoque en cuádriceps.' },
+    { id: 'e_cua_6', name: 'Sentadilla Goblet', emoji: '🍷', muscles: ['Cuádriceps','Glúteos'], desc: 'Sujeta una pesa frente al pecho. Ayuda a mantener el torso erguido.' },
+  ],
+  isquiotibiales: [
+    { id: 'e_isq_1', name: 'Curl de Piernas Acostado', emoji: '🦿', muscles: ['Isquiotibiales'], desc: 'En la máquina, flexiona las rodillas hacia los glúteos.' },
+    { id: 'e_isq_2', name: 'Peso Muerto Rumano (mancuernas)', emoji: '🔻', muscles: ['Isquiotibiales','Glúteos','Lumbares'], desc: 'Bisagra de cadera cargada.' },
+    { id: 'e_isq_3', name: 'Curl Nórdico', emoji: '❄️', muscles: ['Isquiotibiales'], desc: 'Ejercicio avanzado. Desciende el torso controlando con los isquios.' },
+    { id: 'e_isq_4', name: 'Curl de Piernas Sentado', emoji: '🪑', muscles: ['Isquiotibiales'], desc: 'Variación que ofrece mayor estiramiento inicial del músculo.' },
+    { id: 'e_isq_5', name: 'Buenos Días', emoji: '🌅', muscles: ['Isquiotibiales','Lumbares'], desc: 'Enfoca el estiramiento de la cadena posterior.' },
+  ],
+  abductores: [
+    { id: 'e_abd2_1', name: 'Abducción en Máquina', emoji: '🦵', muscles: ['Abductores','Glúteos'], desc: 'Abre las piernas contra la resistencia de la máquina.' },
+    { id: 'e_abd2_2', name: 'Sentadilla Sumo', emoji: '🏆', muscles: ['Abductores','Cuádriceps','Glúteos'], desc: 'Stance amplio activa más abductores.' },
+    { id: 'e_abd2_3', name: 'Abducción con Banda', emoji: '🎗️', muscles: ['Abductores','Glúteos'], desc: 'Usa una banda de resistencia alrededor de las rodillas.' },
+  ],
+  aductores: [
+    { id: 'e_adu_1', name: 'Aducción en Máquina', emoji: '🦿', muscles: ['Aductores'], desc: 'Cierra las piernas contra la resistencia.' },
+    { id: 'e_adu_2', name: 'Aducción en Polea', emoji: '🔗', muscles: ['Aductores'], desc: 'De pie, cruza la pierna por delante de la otra.' },
+    { id: 'e_adu_3', name: 'Copenhague Plank', emoji: '🇩🇰', muscles: ['Aductores','Abdomen'], desc: 'Isométrico avanzado para aductores.' },
+  ],
+  antebrazo: [
+    { id: 'e_ant_1', name: 'Curl de Muñeca (barra)', emoji: '🖐️', muscles: ['Antebrazo'], desc: 'Flexiona la muñeca con agarre supino.' },
+    { id: 'e_ant_2', name: 'Extensión de Muñeca', emoji: '✋', muscles: ['Antebrazo'], desc: 'Agarre prono. Trabaja los extensores.' },
+    { id: 'e_ant_3', name: 'Paseo del Granjero', emoji: '👨‍🌾', muscles: ['Antebrazo','Trapecio','Core'], desc: 'Camina cargando pesas pesadas. Mejora el agarre.' },
+    { id: 'e_ant_4', name: 'Enrollado de Cuerda', emoji: '🧶', muscles: ['Antebrazo'], desc: 'Enrolla y desenrolla un peso atado a un palo.' },
+  ],
+  pantorrillas: [
+    { id: 'e_pan_1', name: 'Elevación de Talones (de pie)', emoji: '👟', muscles: ['Pantorrillas'], desc: 'Sube en punta de pie. Máxima contracción arriba.' },
+    { id: 'e_pan_2', name: 'Elevación de Talones Sentado', emoji: '💺', muscles: ['Pantorrillas'], desc: 'Trabaja el sóleo. Rodillas a 90°.' },
+    { id: 'e_pan_3', name: 'Elevación de Talones en Prensa', emoji: '🔩', muscles: ['Pantorrillas'], desc: 'Usa la máquina de prensa para cargar más peso.' },
+    { id: 'e_pan_4', name: 'Salto de Comba', emoji: '➰', muscles: ['Pantorrillas'], desc: 'Excelente para resistencia y explosividad en gemelos.' },
+  ],
+};
