@@ -4,6 +4,7 @@ export interface Exercise {
   emoji: string;
   muscles: string[];
   desc: string;
+  instructions?: string[];
   muscleId?: string;
   custom?: boolean;
   gifUrl?: string;
@@ -22,6 +23,7 @@ export interface RoutineExercise {
   muscles: string[];
   series: Series[];
   note: string;
+  instructions?: string[];
 }
 
 export interface Routine {

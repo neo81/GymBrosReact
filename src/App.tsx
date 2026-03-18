@@ -220,9 +220,20 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
 
                   <div>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">Instrucciones</h4>
-                    <p className="text-sm text-text-muted leading-relaxed">
-                      {ex?.desc || "No hay instrucciones detalladas para este ejercicio todavía."}
-                    </p>
+                    {ex?.instructions && ex.instructions.length > 0 ? (
+                      <ul className="space-y-2">
+                        {ex.instructions.map((step, idx) => (
+                          <li key={idx} className="flex gap-3 text-sm text-text-muted leading-relaxed">
+                            <span className="text-accent font-bold">{idx + 1}.</span>
+                            <span>{step}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-text-muted leading-relaxed">
+                        {ex?.desc || "No hay instrucciones detalladas para este ejercicio todavía."}
+                      </p>
+                    )}
                   </div>
                 </div>
 
