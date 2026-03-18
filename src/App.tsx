@@ -111,7 +111,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                   <input 
                     type="number" 
                     placeholder="Reps"
-                    className="w-full bg-bg-card border border-white/10 rounded-xl px-3 py-2 text-sm text-center outline-none focus:border-accent"
+                    className="w-full bg-bg-card border border-white/10 rounded-xl px-3 py-2 text-base text-center outline-none focus:border-accent"
                     value={s.reps}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -136,7 +136,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                   <input 
                     type="number" 
                     placeholder="Peso"
-                    className="w-full bg-bg-card border border-white/10 rounded-xl px-3 py-2 text-sm text-center outline-none focus:border-accent"
+                    className="w-full bg-bg-card border border-white/10 rounded-xl px-3 py-2 text-base text-center outline-none focus:border-accent"
                     value={s.weight}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -172,7 +172,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
       <div className="space-y-2">
         <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Notas</label>
         <textarea 
-          className="w-full bg-bg-card border border-white/10 rounded-2xl px-4 py-3.5 text-sm text-white placeholder:text-white/20 outline-none focus:border-accent resize-none h-24"
+          className="w-full bg-bg-card border border-white/10 rounded-2xl px-4 py-3.5 text-base text-white placeholder:text-white/20 outline-none focus:border-accent resize-none h-24"
           placeholder="Ej: Enfocarse en la fase excéntrica..."
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -289,7 +289,7 @@ const Input = ({ label, className, ...props }: React.InputHTMLAttributes<HTMLInp
     {label && <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{label}</label>}
     <input 
       className={cn(
-        "w-full bg-bg-card border border-white/10 rounded-2xl px-4 py-3.5 text-white placeholder:text-white/20 outline-none focus:border-accent transition-colors",
+        "w-full bg-bg-card border border-white/10 rounded-2xl px-4 py-3.5 text-base text-white placeholder:text-white/20 outline-none focus:border-accent transition-colors",
         className
       )}
       {...props}
@@ -323,6 +323,7 @@ export default function App() {
   const [showManualModal, setShowManualModal] = useState(false);
   const [showDeleteRoutineConfirm, setShowDeleteRoutineConfirm] = useState<string | null>(null);
   const [showDeleteDayConfirm, setShowDeleteDayConfirm] = useState<{ routineId: string, day: string } | null>(null);
+  const [showDeleteExerciseConfirm, setShowDeleteExerciseConfirm] = useState<{ day: string, idx: number, routineId?: string } | null>(null);
   const [manualExName, setManualExName] = useState('');
   const [bodyFront, setBodyFront] = useState(true);
   const [filterMode, setFilterMode] = useState<'all' | 'muscle' | 'favs'>('all');
@@ -513,26 +514,6 @@ export default function App() {
     setScreen('configure-exercise');
   };
 
-  const deleteExerciseFromRoutine = (day: string, idx: number) => {
-    if (!ctxDetailId) return;
-    
-    const updatedRoutines = [...routines];
-    const rIdx = updatedRoutines.findIndex(r => r.id === ctxDetailId);
-    if (rIdx === -1) return;
-
-    const updatedRoutine = { ...updatedRoutines[rIdx] };
-    const updatedExercises = [...updatedRoutine.days[day].exercises];
-    updatedExercises.splice(idx, 1);
-    
-    updatedRoutine.days[day] = {
-      ...updatedRoutine.days[day],
-      exercises: updatedExercises
-    };
-
-    updatedRoutines[rIdx] = updatedRoutine;
-    setRoutines(updatedRoutines);
-  };
-
   const deleteDayFromRoutine = (day: string) => {
     if (!ctxDetailId) return;
     const updatedRoutines = [...routines];
@@ -547,6 +528,30 @@ export default function App() {
     updatedRoutines[rIdx] = updatedRoutine;
     setRoutines(updatedRoutines);
     setShowDeleteDayConfirm(null);
+  };
+
+  const confirmDeleteExercise = () => {
+    if (!showDeleteExerciseConfirm) return;
+    const { day, idx, routineId } = showDeleteExerciseConfirm;
+    
+    if (routineId) {
+      const updatedRoutines = [...routines];
+      const rIdx = updatedRoutines.findIndex(r => r.id === routineId);
+      if (rIdx !== -1) {
+        const updatedRoutine = { ...updatedRoutines[rIdx] };
+        const updatedExercises = [...updatedRoutine.days[day].exercises];
+        updatedExercises.splice(idx, 1);
+        updatedRoutine.days[day] = { ...updatedRoutine.days[day], exercises: updatedExercises };
+        updatedRoutines[rIdx] = updatedRoutine;
+        setRoutines(updatedRoutines);
+      }
+    } else if (ctxRoutine) {
+      const updated = { ...ctxRoutine };
+      updated.days[day].exercises.splice(idx, 1);
+      setCtxRoutine(updated);
+    }
+    
+    setShowDeleteExerciseConfirm(null);
   };
 
   const moveExerciseInRoutine = (day: string, idx: number, direction: 'up' | 'down') => {
@@ -752,7 +757,7 @@ export default function App() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            setRoutines(routines.filter(rout => rout.id !== r.id));
+                            setShowDeleteRoutineConfirm(r.id);
                           }}
                           className="p-2 text-red-400 hover:bg-red-400/10 rounded-xl transition-colors"
                         >
@@ -987,7 +992,7 @@ export default function App() {
           <input 
             type="text" 
             placeholder="Buscar ejercicio..."
-            className="w-full bg-bg-card border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 text-white outline-none focus:border-accent"
+            className="w-full bg-bg-card border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 text-base text-white outline-none focus:border-accent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -1162,13 +1167,11 @@ export default function App() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            const updated = { ...ctxRoutine! };
-                            updated.days[ctxDay!].exercises.splice(idx, 1);
-                            setCtxRoutine(updated);
+                            setShowDeleteExerciseConfirm({ day: ctxDay!, idx });
                           }}
                           className="text-danger/40 hover:text-danger transition-colors p-2"
                         >
-                          <X size={18} />
+                          <Trash2 size={18} />
                         </button>
                       </div>
                     </div>
@@ -1275,7 +1278,7 @@ export default function App() {
                                   <Edit2 size={18} />
                                 </button>
                                 <button 
-                                  onClick={() => deleteExerciseFromRoutine(day, idx)}
+                                  onClick={() => setShowDeleteExerciseConfirm({ day, idx, routineId: r.id })}
                                   className="p-2 text-red-400 hover:bg-red-400/10 rounded-xl transition-colors"
                                 >
                                   <Trash2 size={18} />
@@ -1546,7 +1549,7 @@ export default function App() {
                         <input 
                           type="text"
                           autoFocus
-                          className="w-full bg-bg-soft border border-white/10 rounded-2xl px-5 py-4 text-white outline-none focus:border-accent"
+                          className="w-full bg-bg-soft border border-white/10 rounded-2xl px-5 py-4 text-base text-white outline-none focus:border-accent"
                           placeholder="Ej: Press de Banca con Cadenas"
                           value={manualExName}
                           onChange={(e) => setManualExName(e.target.value)}
@@ -1770,6 +1773,37 @@ export default function App() {
                         Eliminar Día
                       </Button>
                       <Button variant="ghost" size="md" onClick={() => setShowDeleteDayConfirm(null)}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showDeleteExerciseConfirm && (
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                >
+                  <div className="p-8 space-y-6 text-center">
+                    <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mx-auto">
+                      <Trash2 size={32} />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold">¿Eliminar Ejercicio?</h3>
+                      <p className="text-xs text-text-muted leading-relaxed">¿Estás seguro de que quieres eliminar este ejercicio de la rutina?</p>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <Button variant="danger" size="lg" onClick={confirmDeleteExercise}>
+                        Eliminar Ejercicio
+                      </Button>
+                      <Button variant="ghost" size="md" onClick={() => setShowDeleteExerciseConfirm(null)}>
                         Cancelar
                       </Button>
                     </div>
