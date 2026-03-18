@@ -1,19 +1,19 @@
 {
-  "name": "GymBros Vanilla v2",
+  "name": "GymBros React PWA",
   "short_name": "GymBros",
   "description": "Tu entrenamiento, inteligente.",
-  "start_url": "index.html",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0F0F1A",
+  "background_color": "#0A0A1A",
   "theme_color": "#6C63FF",
   "icons": [
     {
-      "src": "icons/icon-192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

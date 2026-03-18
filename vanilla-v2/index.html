@@ -6,7 +6,9 @@
     <title>GymBros - Vanilla PWA v2.4</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0F0F1A">
-    <link rel="apple-touch-icon" href="https://picsum.photos/seed/gym/192/192">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Bebas+Neue&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
@@ -28,7 +30,7 @@
                 <p class="text-gray-400 mt-4 font-light tracking-wide text-xl">Tu entrenamiento, inteligente.</p>
             </div>
             <div class="space-y-4">
-                <button onclick="showScreen('register')" class="btn-primary text-lg">Crear mi perfil</button>
+                <button onclick="openRegister()" class="btn-primary text-lg">Crear mi perfil</button>
                 <button onclick="checkProfileAndHome()" class="btn-ghost text-lg text-gray-400">Ya tengo perfil</button>
                 <a href="/" class="block text-center text-[10px] text-gray-500 uppercase tracking-widest mt-6 hover:text-accent transition-colors">Volver a Versión React</a>
             </div>
@@ -38,8 +40,8 @@
     <!-- Screen: Register -->
     <div id="screen-register" class="screen p-6 space-y-8">
         <div class="flex items-center justify-between">
-            <button onclick="showScreen('welcome')" class="text-accent-light text-2xl">←</button>
-            <span class="font-semibold text-gray-300">Mi Perfil</span>
+            <button id="reg-back-btn" onclick="showScreen('welcome')" class="text-accent-light text-2xl">←</button>
+            <span id="reg-title" class="font-semibold text-gray-300">Mi Perfil</span>
             <div class="w-8"></div>
         </div>
         <div class="text-center space-y-3">
@@ -68,7 +70,7 @@
                     <button id="sex-f" onclick="setSex('F')" class="sex-btn btn-ghost text-gray-400">♀ Fem</button>
                 </div>
             </div>
-            <button onclick="handleRegister()" class="btn-primary text-xl mt-8">Empezar a entrenar 💪</button>
+            <button id="reg-submit-btn" onclick="handleRegister()" class="btn-primary text-xl mt-8">Empezar a entrenar 💪</button>
         </div>
     </div>
 
@@ -106,8 +108,8 @@
         
         <div class="space-y-6">
             <div class="flex justify-between items-center px-1">
-                <h3 class="font-display text-lg tracking-widest uppercase text-white font-bold">MIS RUTINAS</h3>
-                <button class="text-accent-light text-[10px] font-bold uppercase tracking-widest">VER PROGRESO</button>
+                <h3 id="home-list-title" class="font-display text-lg tracking-widest uppercase text-white font-bold">MIS RUTINAS</h3>
+                <button onclick="showScreen('progress')" class="text-accent-light text-[10px] font-bold uppercase tracking-widest">VER PROGRESO</button>
             </div>
             <div id="routines-list" class="space-y-4">
                 <!-- Empty State -->
@@ -361,19 +363,26 @@
                 </div>
             </div>
             
-            <div class="grid grid-cols-2 border-t border-white/5">
-                <div class="p-8 text-center border-r border-white/5">
-                    <div id="profile-weight" class="font-display text-5xl text-accent-light">70</div>
-                    <div class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Peso (kg)</div>
+            <div class="grid grid-cols-3 border-t border-white/5">
+                <div class="p-6 text-center border-r border-white/5">
+                    <div id="profile-weight" class="font-display text-4xl text-accent-light">70</div>
+                    <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mt-1">Peso (kg)</div>
                 </div>
-                <div class="p-8 text-center">
-                    <div id="profile-height" class="font-display text-5xl text-accent-light">175</div>
-                    <div class="text-[10px] text-gray-500 uppercase font-bold tracking-widest mt-1">Altura (cm)</div>
+                <div class="p-6 text-center border-r border-white/5">
+                    <div id="profile-height" class="font-display text-4xl text-accent-light">175</div>
+                    <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mt-1">Altura (cm)</div>
+                </div>
+                <div class="p-6 text-center">
+                    <div id="profile-imc" class="font-display text-4xl text-accent-light">22.8</div>
+                    <div class="text-[8px] text-gray-500 uppercase font-bold tracking-widest mt-1">IMC</div>
                 </div>
             </div>
         </div>
 
         <div class="space-y-4 pt-4">
+            <button onclick="openEditProfile()" class="btn-primary flex items-center justify-center gap-2">
+                <span>✏️</span> Editar Perfil
+            </button>
             <button onclick="logout()" class="btn-ghost text-gray-400 flex items-center justify-center gap-2">
                 Cerrar Sesión
             </button>
@@ -381,6 +390,67 @@
                 Borrar todos los datos
             </button>
             <a href="/" class="block text-center text-[10px] text-accent uppercase tracking-widest mt-6 hover:underline">Cambiar a Versión React</a>
+        </div>
+    </div>
+
+    <!-- Screen: Progress -->
+    <div id="screen-progress" class="screen p-6 space-y-8 pb-32">
+        <div class="flex items-center justify-between">
+            <button onclick="showScreen('home')" class="text-accent-light text-2xl">←</button>
+            <h2 class="font-display text-3xl tracking-tight uppercase">PROGRESO</h2>
+            <div class="w-8"></div>
+        </div>
+        
+        <div class="glass rounded-[2.5rem] p-8 text-center space-y-6">
+            <div class="w-20 h-20 bg-accent/10 rounded-3xl flex items-center justify-center text-4xl mx-auto shadow-inner">📈</div>
+            <div class="space-y-2">
+                <h3 class="font-display text-2xl uppercase tracking-wider">Seguimiento</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">
+                    Estamos trabajando en gráficas detalladas de tu volumen y cargas máximas.
+                </p>
+            </div>
+            <div class="pt-4">
+                <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-accent w-1/3 animate-pulse"></div>
+                </div>
+                <p class="text-[10px] text-accent-light font-bold uppercase tracking-widest mt-2">Próximamente</p>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h3 class="font-display text-lg tracking-widest uppercase text-white font-bold px-1">RESUMEN SEMANAL</h3>
+            <div class="glass rounded-3xl p-6">
+                <div class="flex justify-between items-end h-32 gap-2">
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <div class="w-full bg-accent/20 rounded-t-lg" style="height: 40%"></div>
+                        <span class="text-[10px] text-gray-500 font-bold">L</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <div class="w-full bg-accent/20 rounded-t-lg" style="height: 70%"></div>
+                        <span class="text-[10px] text-gray-500 font-bold">M</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <div class="w-full bg-accent/20 rounded-t-lg" style="height: 30%"></div>
+                        <span class="text-[10px] text-gray-500 font-bold">M</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <div class="w-full bg-accent/20 rounded-t-lg" style="height: 90%"></div>
+                        <span class="text-[10px] text-gray-500 font-bold">J</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <div class="w-full bg-accent/20 rounded-t-lg" style="height: 50%"></div>
+                        <span class="text-[10px] text-gray-500 font-bold">V</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <div class="w-full bg-accent/20 rounded-t-lg" style="height: 20%"></div>
+                        <span class="text-[10px] text-gray-500 font-bold">S</span>
+                    </div>
+                    <div class="flex-1 flex flex-col items-center gap-3">
+                        <div class="w-full bg-accent/20 rounded-t-lg" style="height: 10%"></div>
+                        <span class="text-[10px] text-gray-500 font-bold">D</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

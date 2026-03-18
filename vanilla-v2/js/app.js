@@ -9,7 +9,7 @@ let routineDays = [];
 let routineExercises = [];
 let editingExerciseIndex = -1;
 let selectedMuscle = "";
-let targetDayForNewExercise = null;
+let currentMuscleGroup = "";
 let selectedExerciseInfo = "";
 let isFrontView = true;
 let currentSeriesCount = 3;
@@ -82,6 +82,12 @@ function showScreen(screenId) {
     if (screenId === 'home') renderHome();
     if (screenId === 'profile') renderProfile();
     if (screenId === 'routine-detail') renderRoutineDetail();
+    if (screenId === 'progress') renderProgress();
+}
+
+function renderProgress() {
+    // Placeholder for future logic to calculate real stats
+    console.log('Rendering progress screen...');
 }
 
 function checkProfileAndHome() {
@@ -103,6 +109,29 @@ function setSex(sex) {
     }
 }
 
+function openRegister() {
+    document.getElementById('reg-title').innerText = "Mi Perfil";
+    document.getElementById('reg-name').value = "";
+    document.getElementById('reg-weight').value = "";
+    document.getElementById('reg-height').value = "";
+    document.getElementById('reg-submit-btn').innerText = "Empezar a entrenar 💪";
+    document.getElementById('reg-back-btn').setAttribute('onclick', "showScreen('welcome')");
+    setSex('M');
+    showScreen('register');
+}
+
+function openEditProfile() {
+    if (!profile) return;
+    document.getElementById('reg-title').innerText = "Editar Perfil";
+    document.getElementById('reg-name').value = profile.name;
+    document.getElementById('reg-weight').value = profile.weight;
+    document.getElementById('reg-height').value = profile.height;
+    document.getElementById('reg-submit-btn').innerText = "Guardar Cambios";
+    document.getElementById('reg-back-btn').setAttribute('onclick', "showScreen('profile')");
+    setSex(profile.sex);
+    showScreen('register');
+}
+
 function handleRegister() {
     const name = document.getElementById('reg-name').value.trim();
     const weight = document.getElementById('reg-weight').value;
@@ -110,16 +139,24 @@ function handleRegister() {
     
     if (!name) return alert('Por favor, ingresá tu nombre.');
 
+    const isEditing = profile !== null;
+
     profile = {
+        ...profile,
         name,
         weight: parseFloat(weight) || 0,
         height: parseInt(height) || 0,
         sex: selectedSex,
-        createdAt: new Date().toISOString()
+        createdAt: profile ? profile.createdAt : new Date().toISOString()
     };
 
     localStorage.setItem('gymbros_profile', JSON.stringify(profile));
-    showScreen('home');
+    
+    if (isEditing) {
+        showScreen('profile');
+    } else {
+        showScreen('home');
+    }
 }
 
 // --- Home Rendering ---
@@ -151,22 +188,26 @@ function renderHome() {
             </div>
         `;
     } else {
-        list.innerHTML = routines.map((r, idx) => `
-            <div class="glass rounded-[2rem] p-6 space-y-4 active:scale-[0.98] transition-all" onclick="openRoutineDetail(${idx})">
-                <div class="flex justify-between items-start">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-xl shadow-inner">💪</div>
-                        <div>
-                            <h4 class="font-bold text-lg tracking-tight">${r.name}</h4>
-                            <div class="flex gap-1 mt-1">
-                                ${r.days.map(d => `<span class="text-[8px] bg-accent/20 text-accent-light px-1.5 py-0.5 rounded-md font-bold">${d}</span>`).join('')}
+        list.innerHTML = routines.map((r, idx) => {
+            const days = r.days || [];
+            const name = r.name || "Rutina sin nombre";
+            return `
+                <div class="glass rounded-[2rem] p-6 space-y-4 active:scale-[0.98] transition-all" onclick="openRoutineDetail(${idx})">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center text-xl shadow-inner">💪</div>
+                            <div>
+                                <h4 class="font-bold text-lg tracking-tight">${name}</h4>
+                                <div class="flex gap-1 mt-1">
+                                    ${days.map(d => `<span class="text-[8px] bg-accent/20 text-accent-light px-1.5 py-0.5 rounded-md font-bold">${d}</span>`).join('')}
+                                </div>
                             </div>
                         </div>
+                        <button onclick="event.stopPropagation(); deleteRoutine(${idx})" class="w-8 h-8 flex items-center justify-center text-danger/30 hover:text-danger transition-colors text-lg">✕</button>
                     </div>
-                    <button onclick="event.stopPropagation(); deleteRoutine(${idx})" class="w-8 h-8 flex items-center justify-center text-danger/30 hover:text-danger transition-colors text-lg">✕</button>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 }
 
@@ -226,7 +267,10 @@ function renderCreateRoutineExercises() {
                         return `
                             <div class="exercise-card p-4 flex justify-between items-center">
                                 <div onclick="openEditExercise(${globalIdx})" class="flex-1 cursor-pointer">
-                                    <h5 class="font-bold text-sm">${ex.name}</h5>
+                                    <div class="flex items-center gap-2">
+                                        <h5 class="font-bold text-sm">${ex.name}</h5>
+                                        <span class="text-[8px] bg-accent/10 text-accent-light px-1.5 py-0.5 rounded-md font-bold uppercase">${ex.muscle || 'Gral'}</span>
+                                    </div>
                                     <p class="text-[10px] text-gray-500">${ex.series.length} Series</p>
                                 </div>
                                 <button onclick="removeExerciseFromTemp(${globalIdx})" class="text-danger/50 text-xs p-2">✕</button>
@@ -248,7 +292,7 @@ function removeExerciseFromTemp(index) {
 }
 
 function updateDaysUI() {
-    document.querySelectorAll('.day-chip').forEach(chip => {
+    document.querySelectorAll('#screen-create-routine .day-chip').forEach(chip => {
         const day = chip.getAttribute('data-day');
         if (routineDays.includes(day)) chip.classList.add('active');
         else chip.classList.remove('active');
@@ -293,6 +337,8 @@ function openRoutineDetail(index) {
     showScreen('routine-detail');
 }
 
+let activeDayIndex = -1;
+
 function renderRoutineDetail() {
     if (!currentRoutine) return;
     
@@ -304,9 +350,10 @@ function renderRoutineDetail() {
     
     container.innerHTML = currentRoutine.days.map((day, dIdx) => {
         const dayExercises = currentRoutine.exercises.filter(ex => ex.days.includes(day));
+        const isActive = dIdx === activeDayIndex ? 'active' : '';
         
         return `
-            <div class="day-accordion" id="day-accordion-${dIdx}">
+            <div class="day-accordion ${isActive}" id="day-accordion-${dIdx}">
                 <div class="day-header" onclick="toggleDayAccordion(${dIdx})">
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent-light font-bold">${day.charAt(0)}</div>
@@ -326,8 +373,9 @@ function renderRoutineDetail() {
                                     <div class="exercise-card p-5 space-y-4" style="animation-delay: ${idxInDay * 0.1}s">
                                         <div class="flex justify-between items-start">
                                             <div class="flex-1">
-                                                <div class="flex items-center gap-2">
+                                                <div class="flex items-center gap-2 flex-wrap">
                                                     <h4 class="font-bold text-lg">${ex.name}</h4>
+                                                    <span class="text-[10px] bg-accent/10 text-accent-light px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">${ex.muscle || 'Gral'}</span>
                                                     <button onclick="alert('${ex.info || "Sin descripción."}')" class="text-gray-500 text-xs">ⓘ</button>
                                                 </div>
                                                 <table class="series-table">
@@ -351,8 +399,8 @@ function renderRoutineDetail() {
                                             </div>
                                             <div class="flex flex-col gap-2 ml-4">
                                                 <div class="flex gap-1">
-                                                    <button onclick="moveExercise(${globalIdx}, -1)" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs border border-white/5">▲</button>
-                                                    <button onclick="moveExercise(${globalIdx}, 1)" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs border border-white/5">▼</button>
+                                                    <button onclick="moveExercise(${globalIdx}, -1, '${day}')" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs border border-white/5">▲</button>
+                                                    <button onclick="moveExercise(${globalIdx}, 1, '${day}')" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-xs border border-white/5">▼</button>
                                                 </div>
                                                 <div class="flex gap-1">
                                                     <button onclick="openEditExercise(${globalIdx})" class="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center text-accent-light text-xs border border-accent/10">✎</button>
@@ -380,17 +428,31 @@ function toggleDayAccordion(index) {
     const isActive = item.classList.contains('active');
     
     document.querySelectorAll('.day-accordion').forEach(i => i.classList.remove('active'));
-    if (!isActive) item.classList.add('active');
+    
+    if (!isActive) {
+        item.classList.add('active');
+        activeDayIndex = index;
+    } else {
+        activeDayIndex = -1;
+    }
 }
 
-function moveExercise(index, direction) {
+function moveExercise(index, direction, day) {
     const exercises = currentRoutine.exercises;
-    const targetIndex = index + direction;
+    const dayExercises = exercises.filter(ex => ex.days.includes(day));
     
-    if (targetIndex >= 0 && targetIndex < exercises.length) {
+    const currentEx = exercises[index];
+    const indexInDay = dayExercises.indexOf(currentEx);
+    const targetIndexInDay = indexInDay + direction;
+    
+    if (targetIndexInDay >= 0 && targetIndexInDay < dayExercises.length) {
+        const targetEx = dayExercises[targetIndexInDay];
+        const targetGlobalIndex = exercises.indexOf(targetEx);
+        
+        // Swap in global array
         const temp = exercises[index];
-        exercises[index] = exercises[targetIndex];
-        exercises[targetIndex] = temp;
+        exercises[index] = exercises[targetGlobalIndex];
+        exercises[targetGlobalIndex] = temp;
         
         routines[currentRoutine.index].exercises = exercises;
         localStorage.setItem('gymbros_routines', JSON.stringify(routines));
@@ -406,6 +468,7 @@ function openAddExerciseToDay(day) {
 }
 
 function selectMuscle(muscle) {
+    currentMuscleGroup = muscle;
     selectedMuscle = muscle;
     document.querySelectorAll('.muscle-path').forEach(p => p.classList.remove('active'));
     const path = document.querySelector(`.muscle-path[onclick*="${muscle}"]`);
@@ -458,6 +521,7 @@ function handleExerciseSearch(query) {
 }
 
 function selectExerciseFromDB(muscle, idx) {
+    currentMuscleGroup = muscle;
     const ex = EXERCISE_DB[muscle][idx];
     selectedMuscle = ex.name;
     selectedExerciseInfo = ex.info;
@@ -481,9 +545,12 @@ function openExerciseForm() {
     if (isEdit) {
         selectedExerciseInfo = ex.info;
         currentSeriesCount = ex.series.length;
+        currentMuscleGroup = ex.muscle || "";
     } else {
         currentSeriesCount = 3;
     }
+
+    document.getElementById('ex-muscle-info').innerText = currentMuscleGroup || "General";
 
     renderSeriesInputs(ex ? ex.series : null);
 
@@ -633,6 +700,7 @@ function handleSaveExercise() {
         series, 
         notes,
         days: selectedExDays,
+        muscle: currentMuscleGroup,
         info: selectedExerciseInfo || "Ejercicio personalizado."
     };
 
@@ -685,14 +753,22 @@ function closeModal(id) {
 }
 
 // --- Profile Rendering ---
+function calculateIMC(weight, height) {
+    if (!weight || !height) return "0.0";
+    const heightInMeters = height / 100;
+    const imc = weight / (heightInMeters * heightInMeters);
+    return imc.toFixed(1);
+}
+
 function renderProfile() {
     if (!profile) return;
     const avatarLarge = document.getElementById('profile-avatar-large');
     avatarLarge.innerText = profile.name.charAt(0).toUpperCase();
     document.getElementById('profile-name').innerText = profile.name.toUpperCase();
-    document.getElementById('profile-meta-top').innerText = `${profile.sex === 'M' ? 'Masculino' : 'Femenino'} • ${profile.age || 25} años`;
+    document.getElementById('profile-meta-top').innerText = `${profile.sex === 'M' ? 'Masculino' : 'Femenino'}`;
     document.getElementById('profile-weight').innerText = profile.weight;
     document.getElementById('profile-height').innerText = profile.height;
+    document.getElementById('profile-imc').innerText = calculateIMC(profile.weight, profile.height);
 }
 
 function logout() {

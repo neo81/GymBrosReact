@@ -138,4 +138,13 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
     { id: 'e_pan_3', name: 'Elevación de Talones en Prensa', emoji: '🔩', muscles: ['Pantorrillas'], desc: 'Usa la máquina de prensa para cargar más peso.' },
     { id: 'e_pan_4', name: 'Salto de Comba', emoji: '➰', muscles: ['Pantorrillas'], desc: 'Excelente para resistencia y explosividad en gemelos.' },
   ],
+  core: [
+    { id: 'e_cor_1', name: 'Plancha Frontal (Plank)', emoji: '➡️', muscles: ['Core','Abdomen','Lumbares'], desc: 'Isométrico fundamental. Mantén el cuerpo recto y contrae el abdomen.' },
+    { id: 'e_cor_2', name: 'Rueda Abdominal', emoji: '⚙️', muscles: ['Core','Abdomen','Hombros'], desc: 'Extiende el cuerpo controladamente hacia adelante y regresa.' },
+    { id: 'e_cor_3', name: 'Dead Bug', emoji: '🐞', muscles: ['Core','Abdomen'], desc: 'Tumbado boca arriba, extiende brazo y pierna contraria sin arquear la espalda.' },
+    { id: 'e_cor_4', name: 'Bird Dog', emoji: '🐕', muscles: ['Core','Lumbares','Glúteos'], desc: 'En cuadrupedia, extiende brazo y pierna contraria manteniendo el equilibrio.' },
+    { id: 'e_cor_5', name: 'Elevación de Piernas Colgado', emoji: '🪝', muscles: ['Core','Abdomen'], desc: 'Trabaja la estabilidad del core y el abdomen inferior.' },
+    { id: 'e_cor_6', name: 'Press Pallof', emoji: '↔️', muscles: ['Core','Oblicuos'], desc: 'Antirotación. Empuja la polea hacia adelante y resiste la fuerza lateral.' },
+    { id: 'e_cor_7', name: 'Hollow Body Hold', emoji: '🍌', muscles: ['Core','Abdomen'], desc: 'Mantén la espalda baja pegada al suelo mientras elevas hombros y piernas.' },
+  ],
 };

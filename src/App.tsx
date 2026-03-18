@@ -16,7 +16,8 @@ import {
   RotateCcw,
   Search,
   TrendingUp,
-  X
+  X,
+  Clock
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -298,7 +299,7 @@ const Input = ({ label, className, ...props }: React.InputHTMLAttributes<HTMLInp
 
 // --- Main App ---
 
-const DAYS_ORDER = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const DAYS_ORDER = ['CORE', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 export default function App() {
   const [screen, setScreen] = useState<'welcome' | 'register' | 'home' | 'profile' | 'create-routine' | 'select-muscle' | 'exercise-list' | 'configure-exercise' | 'routine-detail' | 'progress'>('welcome');
@@ -320,12 +321,43 @@ export default function App() {
   const [expandedDays, setExpandedDays] = useState<Record<string, boolean>>({});
   const [showExInfo, setShowExInfo] = useState(false);
   const [showManualModal, setShowManualModal] = useState(false);
+  const [showDeleteRoutineConfirm, setShowDeleteRoutineConfirm] = useState<string | null>(null);
+  const [showDeleteDayConfirm, setShowDeleteDayConfirm] = useState<{ routineId: string, day: string } | null>(null);
   const [manualExName, setManualExName] = useState('');
   const [bodyFront, setBodyFront] = useState(true);
   const [filterMode, setFilterMode] = useState<'all' | 'muscle' | 'favs'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [returnToDetail, setReturnToDetail] = useState(false);
   const [routineError, setRoutineError] = useState<string | null>(null);
+
+  // Stopwatch state
+  const [showStopwatch, setShowStopwatch] = useState(false);
+  const [stopwatchTime, setStopwatchTime] = useState(0);
+  const [isStopwatchRunning, setIsStopwatchRunning] = useState(false);
+
+  // Stopwatch logic
+  useEffect(() => {
+    let interval: any;
+    if (isStopwatchRunning) {
+      interval = setInterval(() => {
+        setStopwatchTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isStopwatchRunning]);
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return [
+      h > 0 ? h.toString().padStart(2, '0') : null,
+      m.toString().padStart(2, '0'),
+      s.toString().padStart(2, '0')
+    ].filter(Boolean).join(':');
+  };
 
   // Load data
   useEffect(() => {
@@ -410,25 +442,29 @@ export default function App() {
     if (!ctxRoutine || !ctxDay || !ctxExercise) return;
 
     const updatedRoutine = { ...ctxRoutine };
-    if (!updatedRoutine.days[ctxDay]) {
-      updatedRoutine.days[ctxDay] = { exercises: [] };
-    }
+    const daysToUpdate = ctxDay === 'Todos' ? DAYS_ORDER : [ctxDay];
 
-    const exEntry: RoutineExercise = {
-      id: ctxEditingIdx !== null ? updatedRoutine.days[ctxDay].exercises[ctxEditingIdx].id : genId(),
-      exerciseId: ctxExercise.id,
-      name: ctxExercise.name,
-      emoji: ctxExercise.emoji,
-      muscles: ctxExercise.muscles,
-      series,
-      note
-    };
+    daysToUpdate.forEach(day => {
+      if (!updatedRoutine.days[day]) {
+        updatedRoutine.days[day] = { exercises: [] };
+      }
 
-    if (ctxEditingIdx !== null) {
-      updatedRoutine.days[ctxDay].exercises[ctxEditingIdx] = exEntry;
-    } else {
-      updatedRoutine.days[ctxDay].exercises.push(exEntry);
-    }
+      const exEntry: RoutineExercise = {
+        id: (ctxDay !== 'Todos' && ctxEditingIdx !== null) ? updatedRoutine.days[day].exercises[ctxEditingIdx].id : genId(),
+        exerciseId: ctxExercise.id,
+        name: ctxExercise.name,
+        emoji: ctxExercise.emoji,
+        muscles: ctxExercise.muscles,
+        series: JSON.parse(JSON.stringify(series)),
+        note
+      };
+
+      if (ctxDay !== 'Todos' && ctxEditingIdx !== null) {
+        updatedRoutine.days[day].exercises[ctxEditingIdx] = exEntry;
+      } else {
+        updatedRoutine.days[day].exercises.push(exEntry);
+      }
+    });
 
     setCtxRoutine(updatedRoutine);
     setCtxEditingIdx(null);
@@ -446,6 +482,12 @@ export default function App() {
       setScreen('routine-detail');
       setReturnToDetail(false);
     } else {
+      // If we are in "Todos" mode, we should stay in create-routine but maybe reset ctxDay to something else 
+      // or just stay there. The user said "it doesn't look like it saved".
+      // Let's make sure we go back to create-routine and maybe show a small toast or just ensure ctxDay is set to a specific day if it was 'Todos'
+      if (ctxDay === 'Todos') {
+        setCtxDay('Lunes');
+      }
       setScreen('create-routine');
     }
   };
@@ -491,6 +533,22 @@ export default function App() {
     setRoutines(updatedRoutines);
   };
 
+  const deleteDayFromRoutine = (day: string) => {
+    if (!ctxDetailId) return;
+    const updatedRoutines = [...routines];
+    const rIdx = updatedRoutines.findIndex(r => r.id === ctxDetailId);
+    if (rIdx === -1) return;
+
+    const updatedRoutine = { ...updatedRoutines[rIdx] };
+    const newDays = { ...updatedRoutine.days };
+    delete newDays[day];
+    updatedRoutine.days = newDays;
+    
+    updatedRoutines[rIdx] = updatedRoutine;
+    setRoutines(updatedRoutines);
+    setShowDeleteDayConfirm(null);
+  };
+
   const moveExerciseInRoutine = (day: string, idx: number, direction: 'up' | 'down') => {
     if (!ctxDetailId) return;
     
@@ -530,6 +588,19 @@ export default function App() {
     setManualExName('');
     setShowManualModal(false);
     setScreen('configure-exercise');
+  };
+
+  const calculateBMI = (weight: number, height: number) => {
+    if (!weight || !height) return 0;
+    const heightInMeters = height / 100;
+    return (weight / (heightInMeters * heightInMeters)).toFixed(1);
+  };
+
+  const getBMICategory = (bmi: number) => {
+    if (bmi < 18.5) return { label: 'Bajo peso', color: 'text-blue-400' };
+    if (bmi < 25) return { label: 'Normal', color: 'text-emerald-400' };
+    if (bmi < 30) return { label: 'Sobrepeso', color: 'text-yellow-400' };
+    return { label: 'Obesidad', color: 'text-danger' };
   };
 
   const renderWelcome = () => (
@@ -805,37 +876,55 @@ export default function App() {
                 )}
               </g>
               
-              {muscles.map(m => (
-                <g key={m.id} className="cursor-pointer group" onClick={() => selectMuscle(m.id)}>
-                  <circle 
-                    cx={m.cx} cy={m.cy} r={m.r + 10} 
-                    fill="transparent" 
-                  />
-                  <circle 
-                    cx={m.cx} cy={m.cy} r={m.r} 
-                    fill={ctxMuscle === m.id ? "#6C63FF" : "rgba(108,99,255,0.2)"}
-                    stroke={ctxMuscle === m.id ? "#8B84FF" : "rgba(108,99,255,0.4)"}
-                    strokeWidth="1.5"
-                    filter={ctxMuscle === m.id ? "url(#glow)" : ""}
-                    className="transition-all duration-300 group-hover:fill-accent/60 group-hover:r-[110%]"
-                  />
-                  <line 
-                    x1={m.cx} y1={m.cy} 
-                    x2={m.cx > 160 ? m.cx + 25 : m.cx - 25} 
-                    y2={m.cy} 
-                    stroke="white" strokeOpacity="0.2" strokeWidth="1"
-                  />
-                  <text 
-                    x={m.cx > 160 ? m.cx + 30 : m.cx - 30} 
-                    y={m.cy + 4} 
-                    className="text-[9px] font-bold fill-white/80 pointer-events-none uppercase tracking-tighter"
-                    textAnchor={m.cx > 160 ? "start" : "end"}
+              {muscles.map(m => {
+                const isDisabled = ctxDay === 'CORE';
+                return (
+                  <g 
+                    key={m.id} 
+                    className={cn("group", isDisabled ? "opacity-20 pointer-events-none" : "cursor-pointer")} 
+                    onClick={() => !isDisabled && selectMuscle(m.id)}
                   >
-                    {m.label}
-                  </text>
-                </g>
-              ))}
+                    <circle 
+                      cx={m.cx} cy={m.cy} r={m.r + 10} 
+                      fill="transparent" 
+                    />
+                    <circle 
+                      cx={m.cx} cy={m.cy} r={m.r} 
+                      fill={ctxMuscle === m.id ? "#6C63FF" : "rgba(108,99,255,0.2)"}
+                      stroke={ctxMuscle === m.id ? "#8B84FF" : "rgba(108,99,255,0.4)"}
+                      strokeWidth="1.5"
+                      filter={ctxMuscle === m.id ? "url(#glow)" : ""}
+                      className="transition-all duration-300 group-hover:fill-accent/60 group-hover:r-[110%]"
+                    />
+                    <line 
+                      x1={m.cx} y1={m.cy} 
+                      x2={m.cx > 160 ? m.cx + 25 : m.cx - 25} 
+                      y2={m.cy} 
+                      stroke="white" strokeOpacity="0.2" strokeWidth="1"
+                    />
+                    <text 
+                      x={m.cx > 160 ? m.cx + 30 : m.cx - 30} 
+                      y={m.cy + 4} 
+                      className="text-[9px] font-bold fill-white/80 pointer-events-none uppercase tracking-tighter"
+                      textAnchor={m.cx > 160 ? "start" : "end"}
+                    >
+                      {m.label}
+                    </text>
+                  </g>
+                );
+              })}
             </svg>
+
+            {/* Core Button Bottom Right */}
+            <button 
+              onClick={() => selectMuscle('core')}
+              className={cn(
+                "absolute bottom-6 right-6 px-4 py-2 rounded-full text-xs font-bold transition-all border",
+                ctxMuscle === 'core' ? "bg-accent text-white border-accent" : "bg-bg-card text-text-muted border-white/10"
+              )}
+            >
+              Core
+            </button>
           </div>
 
           <Button 
@@ -848,18 +937,23 @@ export default function App() {
         </div>
 
         <div className="flex flex-wrap gap-2 justify-center">
-          {muscles.map(m => (
-            <button 
-              key={m.id}
-              onClick={() => selectMuscle(m.id)}
-              className={cn(
-                "px-4 py-2 rounded-full text-xs font-bold transition-all",
-                ctxMuscle === m.id ? "bg-accent text-white" : "bg-bg-card text-text-muted border border-white/10"
-              )}
-            >
-              {m.label}
-            </button>
-          ))}
+          {muscles.map(m => {
+            const isDisabled = ctxDay === 'CORE';
+            return (
+              <button 
+                key={m.id}
+                disabled={isDisabled}
+                onClick={() => selectMuscle(m.id)}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-bold transition-all",
+                  ctxMuscle === m.id ? "bg-accent text-white" : "bg-bg-card text-text-muted border border-white/10",
+                  isDisabled && "opacity-20"
+                )}
+              >
+                {m.label}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -870,7 +964,18 @@ export default function App() {
     return (
       <div className="min-h-screen p-6 space-y-6">
         <div className="flex items-center justify-between">
-          <button onClick={() => { setCtxMuscle(null); setScreen('select-muscle'); }} className="text-accent-light flex items-center gap-1">
+          <button 
+            onClick={() => { 
+              if (ctxDay === 'CORE') {
+                setCtxMuscle(null);
+                setScreen('create-routine');
+              } else {
+                setCtxMuscle(null); 
+                setScreen('select-muscle'); 
+              }
+            }} 
+            className="text-accent-light flex items-center gap-1"
+          >
             <ChevronLeft size={20} /> Atrás
           </button>
           <span className="font-semibold">Ejercicios</span>
@@ -983,7 +1088,7 @@ export default function App() {
         <div className="space-y-3">
           <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Días de Entrenamiento</label>
           <div className="grid grid-cols-4 gap-2">
-            {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(day => (
+            {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Todos'].map(day => (
               <button 
                 key={day}
                 onClick={() => setCtxDay(day)}
@@ -992,53 +1097,88 @@ export default function App() {
                   ctxDay === day ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-white/10 text-text-muted"
                 )}
               >
-                {day.slice(0, 3)}
+                {day === 'Todos' ? 'Todos' : day.slice(0, 3)}
               </button>
             ))}
           </div>
+          <button 
+            onClick={() => setCtxDay('CORE')}
+            className={cn(
+              "w-full py-3 rounded-2xl text-xs font-bold transition-all border",
+              ctxDay === 'CORE' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-white/10 text-text-muted"
+            )}
+          >
+            CORE
+          </button>
         </div>
 
         {ctxDay && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-bold text-accent-light">{ctxDay}</h4>
-              <button onClick={() => { setCtxMuscle(null); setScreen('select-muscle'); }} className="text-accent-light flex items-center gap-1 text-xs font-bold">
-                <Plus size={14} /> Agregar Ejercicio
-              </button>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => { 
+                    if (ctxDay === 'CORE') {
+                      selectMuscle('core');
+                    } else {
+                      setCtxMuscle(null); 
+                      setScreen('select-muscle'); 
+                    }
+                  }} 
+                  className="text-accent-light flex items-center gap-1 text-xs font-bold"
+                >
+                  <Plus size={14} /> Agregar Ejercicio {ctxDay === 'Todos' ? 'a Todos' : ''}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3">
-              {(ctxRoutine?.days[ctxDay]?.exercises || []).map((ex, idx) => (
-                <div key={ex.id} className="bg-bg-soft border border-white/5 rounded-2xl p-4 flex items-center gap-4 active:scale-[0.98] transition-transform cursor-pointer" onClick={() => editExerciseInRoutine(ctxDay, idx)}>
-                  <div className="w-12 h-12 bg-bg-card rounded-xl flex items-center justify-center text-2xl">
-                    {ex.emoji}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h5 className="text-sm font-bold truncate">{ex.name}</h5>
-                    <p className="text-[10px] text-text-muted">{ex.series.length} series · {ex.series.filter(s => s.reps).length} cargadas</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 text-accent-light/60">
-                      <Edit2 size={16} />
+              {ctxDay === 'Todos' ? (
+                <div className="text-center py-8 border border-dashed border-white/10 rounded-2xl opacity-60 bg-accent/5">
+                  <p className="text-xs font-bold text-accent-light">Modo "Todos los días" activo</p>
+                  <p className="text-[10px] mt-1 text-text-muted px-4">Los ejercicios que agregues se copiarán automáticamente a todos los días de la semana.</p>
+                </div>
+              ) : (
+                <>
+                  {(ctxRoutine?.days[ctxDay]?.exercises || []).map((ex, idx) => (
+                    <div key={ex.id} className="bg-bg-soft border border-white/5 rounded-2xl p-4 flex items-center gap-4 active:scale-[0.98] transition-transform cursor-pointer" onClick={() => editExerciseInRoutine(ctxDay, idx)}>
+                      <div className="w-12 h-12 bg-bg-card rounded-xl flex items-center justify-center text-2xl">
+                        {ex.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <h5 className="text-sm font-bold truncate">{ex.name}</h5>
+                          <span className="px-1.5 py-0.5 bg-accent/10 text-accent-light text-[8px] font-bold rounded uppercase whitespace-nowrap">
+                            {ex.muscles[0] || 'Gral'}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-text-muted">{ex.series.length} series · {ex.series.filter(s => s.reps).length} cargadas</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 text-accent-light/60">
+                          <Edit2 size={16} />
+                        </div>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const updated = { ...ctxRoutine! };
+                            updated.days[ctxDay!].exercises.splice(idx, 1);
+                            setCtxRoutine(updated);
+                          }}
+                          className="text-danger/40 hover:text-danger transition-colors p-2"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
                     </div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const updated = { ...ctxRoutine! };
-                        updated.days[ctxDay!].exercises.splice(idx, 1);
-                        setCtxRoutine(updated);
-                      }}
-                      className="text-danger/40 hover:text-danger transition-colors p-2"
-                    >
-                      <X size={18} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {(ctxRoutine?.days[ctxDay]?.exercises || []).length === 0 && (
-                <div className="text-center py-8 border border-dashed border-white/10 rounded-2xl opacity-40">
-                  <p className="text-xs">No hay ejercicios para este día</p>
-                </div>
+                  ))}
+                  {(ctxRoutine?.days[ctxDay]?.exercises || []).length === 0 && (
+                    <div className="text-center py-8 border border-dashed border-white/10 rounded-2xl opacity-40">
+                      <p className="text-xs">No hay ejercicios para este día</p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -1062,7 +1202,16 @@ export default function App() {
         </div>
 
         <div className="space-y-8">
-          <h3 className="text-3xl font-display tracking-wider">{r.name}</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-3xl font-display tracking-wider">{r.name}</h3>
+            <button 
+              onClick={() => setShowStopwatch(true)}
+              className="p-3 bg-accent/10 text-accent-light rounded-2xl hover:bg-accent/20 transition-colors flex items-center gap-2"
+            >
+              <Clock size={20} />
+              {stopwatchTime > 0 && <span className="text-xs font-mono font-bold">{formatTime(stopwatchTime)}</span>}
+            </button>
+          </div>
 
           <div className="space-y-4">
             {Object.entries(r.days)
@@ -1093,7 +1242,12 @@ export default function App() {
                               <div className="flex items-center gap-4">
                                 <div className="text-3xl">{ex.emoji}</div>
                                 <div>
-                                  <h5 className="font-bold">{ex.name}</h5>
+                                  <div className="flex items-center gap-2 mb-0.5">
+                                    <h5 className="font-bold">{ex.name}</h5>
+                                    <span className="px-1.5 py-0.5 bg-accent/10 text-accent-light text-[8px] font-bold rounded uppercase">
+                                      {ex.muscles[0] || 'Gral'}
+                                    </span>
+                                  </div>
                                   <p className="text-[10px] text-text-muted">{ex.muscles.join(', ')}</p>
                                 </div>
                               </div>
@@ -1150,7 +1304,7 @@ export default function App() {
                         </Card>
                       </div>
                     ))}
-                    <div className="pt-2">
+                    <div className="pt-2 flex flex-col gap-2">
                       <button 
                         onClick={() => {
                           setCtxRoutine(r);
@@ -1164,6 +1318,12 @@ export default function App() {
                       >
                         <Plus size={14} /> Agregar Ejercicio a {day}
                       </button>
+                      <button 
+                        onClick={() => setShowDeleteDayConfirm({ routineId: r.id, day })}
+                        className="w-full py-3 text-danger/60 hover:text-danger text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-colors"
+                      >
+                        <Trash2 size={12} /> Borrar Día {day}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -1175,10 +1335,7 @@ export default function App() {
           <Button 
             variant="danger-outline" 
             size="xl" 
-            onClick={() => {
-              setRoutines(routines.filter(rout => rout.id !== r.id));
-              setScreen('home');
-            }}
+            onClick={() => setShowDeleteRoutineConfirm(r.id)}
           >
             <Trash2 size={18} /> Eliminar Rutina
           </Button>
@@ -1315,6 +1472,58 @@ export default function App() {
           {screen === 'routine-detail' && renderRoutineDetail()}
 
           <AnimatePresence>
+            {showStopwatch && (
+              <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                >
+                  <div className="p-8 space-y-8 text-center">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-bold">Cronómetro</h3>
+                      <button onClick={() => setShowStopwatch(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-6xl font-display tracking-widest text-accent-light tabular-nums">
+                        {formatTime(stopwatchTime)}
+                      </div>
+                      <p className="text-[10px] text-text-muted uppercase tracking-[0.2em] font-bold">Tiempo Transcurrido</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3">
+                      {!isStopwatchRunning ? (
+                        <Button size="xl" onClick={() => setIsStopwatchRunning(true)}>
+                          Comenzar
+                        </Button>
+                      ) : (
+                        <Button size="xl" variant="danger" onClick={() => setIsStopwatchRunning(false)}>
+                          Detener
+                        </Button>
+                      )}
+                      <Button 
+                        variant="ghost" 
+                        size="md" 
+                        onClick={() => {
+                          setIsStopwatchRunning(false);
+                          setStopwatchTime(0);
+                        }}
+                        className="text-[10px] uppercase tracking-widest"
+                      >
+                        Reiniciar
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
             {showManualModal && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
                 <motion.div 
@@ -1444,16 +1653,31 @@ export default function App() {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-2 border-t border-white/5">
-                      <div className="p-6 text-center border-r border-white/5">
-                        <div className="font-display text-4xl text-accent-light">{profile?.weight}</div>
-                        <div className="text-[10px] text-text-muted uppercase font-bold">Peso (kg)</div>
+                    <div className="grid grid-cols-3 border-t border-white/5">
+                      <div className="p-4 text-center border-r border-white/5">
+                        <div className="font-display text-3xl text-accent-light">{profile?.weight}</div>
+                        <div className="text-[9px] text-text-muted uppercase font-bold">Peso (kg)</div>
                       </div>
-                      <div className="p-6 text-center">
-                        <div className="font-display text-4xl text-accent-light">{profile?.height}</div>
-                        <div className="text-[10px] text-text-muted uppercase font-bold">Altura (cm)</div>
+                      <div className="p-4 text-center border-r border-white/5">
+                        <div className="font-display text-3xl text-accent-light">{profile?.height}</div>
+                        <div className="text-[9px] text-text-muted uppercase font-bold">Altura (cm)</div>
+                      </div>
+                      <div className="p-4 text-center">
+                        <div className="font-display text-3xl text-accent-light">
+                          {profile ? calculateBMI(profile.weight, profile.height) : 0}
+                        </div>
+                        <div className="text-[9px] text-text-muted uppercase font-bold">IMC</div>
                       </div>
                     </div>
+                    
+                    {profile && (
+                      <div className="px-6 py-3 bg-white/5 border-t border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Estado IMC</span>
+                        <span className={cn("text-[10px] font-bold uppercase tracking-widest", getBMICategory(Number(calculateBMI(profile.weight, profile.height))).color)}>
+                          {getBMICategory(Number(calculateBMI(profile.weight, profile.height))).label}
+                        </span>
+                      </div>
+                    )}
                   </Card>
 
                   <div className="space-y-3">
@@ -1489,6 +1713,72 @@ export default function App() {
               )}
             </div>
           )}
+          <AnimatePresence>
+            {showDeleteRoutineConfirm && (
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                >
+                  <div className="p-8 space-y-6 text-center">
+                    <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mx-auto">
+                      <Trash2 size={32} />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold">¿Eliminar Rutina?</h3>
+                      <p className="text-xs text-text-muted leading-relaxed">Esta acción no se puede deshacer. Se borrarán todos los ejercicios de esta rutina.</p>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <Button variant="danger" size="lg" onClick={() => {
+                        setRoutines(routines.filter(r => r.id !== showDeleteRoutineConfirm));
+                        setScreen('home');
+                        setShowDeleteRoutineConfirm(null);
+                      }}>
+                        Eliminar Rutina
+                      </Button>
+                      <Button variant="ghost" size="md" onClick={() => setShowDeleteRoutineConfirm(null)}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence>
+            {showDeleteDayConfirm && (
+              <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                >
+                  <div className="p-8 space-y-6 text-center">
+                    <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mx-auto">
+                      <Trash2 size={32} />
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold">¿Eliminar Día?</h3>
+                      <p className="text-xs text-text-muted leading-relaxed">Se borrarán todos los ejercicios del día <span className="text-white font-bold">{showDeleteDayConfirm.day}</span>.</p>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <Button variant="danger" size="lg" onClick={() => deleteDayFromRoutine(showDeleteDayConfirm.day)}>
+                        Eliminar Día
+                      </Button>
+                      <Button variant="ghost" size="md" onClick={() => setShowDeleteDayConfirm(null)}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
         </motion.div>
       </AnimatePresence>
     </div>
