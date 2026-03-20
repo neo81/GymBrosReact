@@ -16,13 +16,37 @@
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
   --color-border: var(--border);
+  --color-shadow-accent: var(--shadow-accent);
 
   --animate-bob: bob 2s ease-in-out infinite;
+  --animate-matrix-rain: matrix-rain 20s linear infinite;
+  --animate-scanline: scanline 8s linear infinite;
 
   @keyframes bob {
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-6px) scale(1.05); }
   }
+
+  @keyframes matrix-rain {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 1000px; }
+  }
+
+  @keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+  }
+
+  --animate-glitch: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
 }
 
 :root {
@@ -36,6 +60,7 @@
   --text: #1A1A1A;
   --text-muted: #6C757D;
   --border: rgba(0, 0, 0, 0.1);
+  --shadow-accent: rgba(108, 99, 255, 0.32);
 }
 
 .dark {
@@ -49,6 +74,7 @@
   --text: #FFFFFF;
   --text-muted: #7B7AA0;
   --border: rgba(255, 255, 255, 0.1);
+  --shadow-accent: rgba(108, 99, 255, 0.2);
 }
 
 @layer base {

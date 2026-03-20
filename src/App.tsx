@@ -51,19 +51,25 @@ const ExerciseIcon = ({ ex, className, size = 'md' }: { ex: Exercise | null; cla
   if (!ex?.gifUrl || error) {
     return (
       <div className={cn("flex items-center justify-center", className)}>
-        <span className={cn("animate-bob", iconSizes[size])}>{ex?.emoji || '🏋️'}</span>
+        <span className={cn("animate-bob theme-v3:drop-shadow-[0_0_10px_var(--accent)]", iconSizes[size])}>{ex?.emoji || '🏋️'}</span>
       </div>
     );
   }
 
   return (
-    <img 
-      src={ex.gifUrl} 
-      alt={ex.name} 
-      className={cn("w-full h-full object-cover", className)} 
-      referrerPolicy="no-referrer"
-      onError={() => setError(true)}
-    />
+    <div className={cn("relative overflow-hidden", className)}>
+      <img 
+        src={ex.gifUrl} 
+        alt={ex.name} 
+        className={cn(
+          "w-full h-full object-cover",
+          "theme-v3:brightness-110 theme-v3:contrast-150 theme-v3:grayscale theme-v3:sepia theme-v3:hue-rotate-[100deg] theme-v3:saturate-[10] theme-v3:animate-glitch"
+        )} 
+        referrerPolicy="no-referrer"
+        onError={() => setError(true)}
+      />
+      <div className="absolute inset-0 pointer-events-none opacity-0 theme-v3:opacity-30 bg-gradient-to-b from-transparent via-accent/20 to-transparent animate-scanline" />
+    </div>
   );
 };
 
@@ -99,8 +105,10 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
         <button onClick={onBack} className="text-accent-light flex items-center gap-1">
           <ChevronLeft size={20} /> Atrás
         </button>
-        <span className="font-semibold">Configurar Ejercicio</span>
-        <button onClick={() => onSave(series, note)} className="text-accent-light font-bold text-sm">Guardar</button>
+        <span className="font-semibold">
+          Configurar Ejercicio
+        </span>
+        <button onClick={() => onSave(series, note)} className="text-accent-light font-bold text-sm">GUARDAR</button>
       </div>
 
       <Card className="flex items-center gap-4 relative">
@@ -109,7 +117,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
         </div>
         <div className="flex-1">
           <h4 className="font-bold">{ex?.name}</h4>
-          <p className="text-[10px] text-text-muted uppercase tracking-widest">{ex?.muscles.join(', ')}</p>
+          <p className="text-[10px] text-text-muted uppercase tracking-widest">OBJETIVO: {ex?.muscles.join(', ')}</p>
         </div>
         <button 
           onClick={() => setShowInfo(true)}
@@ -121,7 +129,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
 
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h5 className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Series</h5>
+          <h5 className="text-[10px] font-bold uppercase tracking-widest text-text-muted">DATOS SERIES</h5>
           <div className="flex items-center gap-3">
             <select 
               className="bg-bg-card border border-border rounded-lg px-2 py-1 text-[9px] font-bold uppercase text-accent-light outline-none"
@@ -131,15 +139,15 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                 setSeries(series.map(s => ({ ...s, unit: newUnit })));
               }}
             >
-              <option value="kg">Kilo (KG)</option>
-              <option value="min">Minuto (MIN)</option>
-              <option value="seg">Segundo (SEG)</option>
+              <option value="kg">UNIDAD: KG</option>
+              <option value="min">UNIDAD: MIN</option>
+              <option value="seg">UNIDAD: SEG</option>
             </select>
             <button 
               onClick={() => setSeries([...series, { reps: '', weight: '', unit: series[0]?.unit || 'kg' }])}
               className="text-accent-light text-[10px] font-bold uppercase tracking-widest"
             >
-              + Agregar Serie
+              + AGREGAR SERIE
             </button>
           </div>
         </div>
@@ -212,7 +220,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Notas</label>
+        <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">NOTAS</label>
         <textarea 
           className="w-full bg-bg-card border border-border rounded-2xl px-4 py-3.5 text-base text-text placeholder:text-text-muted/40 outline-none focus:border-accent resize-none h-24"
           placeholder="Ej: Enfocarse en la fase excéntrica..."
@@ -246,7 +254,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
 
                 <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">Músculos Trabajados</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">MÚSCULOS OBJETIVO</h4>
                     <div className="flex flex-wrap gap-2">
                       {ex?.muscles.map(m => (
                         <span key={m} className="px-3 py-1 bg-accent/10 text-accent-light text-[10px] font-bold rounded-full uppercase">
@@ -257,12 +265,12 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                   </div>
 
                   <div>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">Instrucciones</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-1">PASOS DE EJECUCIÓN</h4>
                     {ex?.instructions && ex.instructions.length > 0 ? (
                       <ul className="space-y-2">
                         {ex.instructions.map((step, idx) => (
                           <li key={idx} className="flex gap-3 text-sm text-text-muted leading-relaxed">
-                            <span className="text-accent font-bold">{idx + 1}.</span>
+                            <span className="text-accent font-bold">[{idx + 1}]</span>
                             <span>{step}</span>
                           </li>
                         ))}
@@ -275,7 +283,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                   </div>
                 </div>
 
-                <Button className="w-full" onClick={() => setShowInfo(false)}>Entendido</Button>
+                <Button className="w-full" onClick={() => setShowInfo(false)}>ENTENDIDO</Button>
               </div>
             </motion.div>
           </div>
@@ -296,8 +304,8 @@ const Button = ({
   size?: 'sm' | 'md' | 'lg' | 'xl';
 }) => {
   const variants = {
-    primary: 'bg-accent text-white shadow-[0_4px_24px_rgba(108,99,255,0.32)] active:scale-95',
-    ghost: 'bg-bg-card text-text-muted border border-border active:scale-95',
+    primary: 'bg-accent text-black shadow-[0_4px_24px_var(--shadow-accent)] active:scale-95 theme-v3:font-mono theme-v3:tracking-tighter theme-v3:uppercase theme-v3:border-2 theme-v3:border-accent theme-v3:shadow-[4px_4px_0_var(--shadow-accent)] theme-v3:rounded-none',
+    ghost: 'bg-bg-card text-text-muted border border-border active:scale-95 theme-v3:font-mono theme-v3:border-2 theme-v3:border-accent/30 theme-v3:text-accent theme-v3:rounded-none theme-v3:bg-black',
     danger: 'bg-danger text-white active:scale-95',
     'danger-outline': 'bg-danger/10 text-danger border border-danger active:scale-95',
   };
@@ -327,7 +335,12 @@ const Button = ({
 const Card = ({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) => (
   <div 
     onClick={onClick}
-    className={cn('bg-bg-soft border border-border rounded-3xl p-5 shadow-xl', onClick && 'cursor-pointer active:scale-[0.98] transition-transform', className)}
+    className={cn(
+      'bg-bg-soft border border-border rounded-3xl p-5 shadow-xl transition-all', 
+      'theme-v3:bg-black theme-v3:border-2 theme-v3:border-accent/20 theme-v3:rounded-none theme-v3:shadow-[6px_6px_0_rgba(0,255,65,0.1)] theme-v3:hover:border-accent theme-v3:hover:shadow-[8px_8px_0_rgba(0,255,65,0.2)]',
+      onClick && 'cursor-pointer active:scale-[0.98]', 
+      className
+    )}
   >
     {children}
   </div>
@@ -335,10 +348,11 @@ const Card = ({ children, className, onClick }: { children: React.ReactNode; cla
 
 const Input = ({ label, className, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label?: string }) => (
   <div className="space-y-2">
-    {label && <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{label}</label>}
+    {label && <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1 theme-v3:text-accent theme-v3:font-mono">{label}</label>}
     <input 
       className={cn(
         "w-full bg-bg-card border border-border rounded-2xl px-4 py-3.5 text-base text-text placeholder:text-text-muted/40 outline-none focus:border-accent transition-colors",
+        "theme-v3:bg-black theme-v3:border-accent/30 theme-v3:rounded-none theme-v3:font-mono theme-v3:text-accent theme-v3:placeholder:text-accent/20",
         className
       )}
       {...props}
@@ -363,6 +377,7 @@ export default function App() {
   // Theme logic
   useEffect(() => {
     const savedTheme = localStorage.getItem('gymbros_theme') as 'light' | 'dark' | null;
+    
     if (savedTheme) {
       setTheme(savedTheme);
     } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -371,11 +386,21 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const themeColor = theme === 'dark' ? '#0F0F1A' : '#F8F9FA';
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', themeColor);
+    }
+
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+    
+    // Always remove theme-v3 as we are reverting
+    document.documentElement.classList.remove('theme-v3');
+
     localStorage.setItem('gymbros_theme', theme);
   }, [theme]);
 
@@ -400,6 +425,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [returnToDetail, setReturnToDetail] = useState(false);
   const [routineError, setRoutineError] = useState<string | null>(null);
+  const [welcomeError, setWelcomeError] = useState<string | null>(null);
 
   // Stopwatch state
   const [showStopwatch, setShowStopwatch] = useState(false);
@@ -683,39 +709,74 @@ export default function App() {
   };
 
   const renderWelcome = () => (
-    <div className="relative h-screen flex flex-col justify-end p-8 overflow-hidden">
+    <div className="relative h-screen flex flex-col justify-center items-center p-8 overflow-hidden text-center">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-20 -left-16 w-80 h-80 bg-accent rounded-full blur-[80px] opacity-20 orb-float" />
         <div className="absolute top-[40%] -right-20 w-60 h-60 bg-danger rounded-full blur-[80px] opacity-20 orb-float" style={{ animationDelay: '-3s' }} />
       </div>
       
-      <div className="relative z-10 space-y-12">
-        <div>
-          <span className="text-5xl block mb-2 drop-shadow-[0_0_20px_rgba(108,99,255,0.8)]">⚡</span>
-          <h1 className="font-display text-8xl tracking-wider leading-[0.9]">
+      <div className="relative z-10 space-y-20 w-full max-w-xs">
+        <div className="space-y-6">
+          <div>
+            <span className="text-7xl block drop-shadow-[0_0_20px_rgba(108,99,255,0.8)]">⚡</span>
+          </div>
+          <h1 className="font-display text-9xl tracking-tighter leading-[0.8]">
             GYM<span className="text-accent-light">BROS</span>
           </h1>
-          <p className="text-text-muted mt-2 font-light tracking-wide">Tu entrenamiento, inteligente.</p>
+          <div className="flex items-center justify-center gap-2 opacity-70">
+            <p className="text-text-muted font-light tracking-wide text-sm">
+              Tu entrenamiento, inteligente.
+            </p>
+          </div>
         </div>
         
-        <div className="space-y-3">
-          <Button size="xl" onClick={() => setScreen('register')}>Crear mi perfil</Button>
-          <Button size="xl" variant="ghost" onClick={() => {
-            const p = localStorage.getItem('gymbros_profile');
-            if (p) setProfile(JSON.parse(p));
-            setScreen('home');
-          }}>Ya tengo perfil</Button>
-          <a href="/vanilla-v2/index.html" className="block text-center text-[10px] text-text-muted uppercase tracking-widest mt-4 hover:text-accent transition-colors">
-            Probar Versión Vanilla PWA (v2)
-          </a>
+        <div className="space-y-6">
+          {welcomeError && (
+            <motion.div 
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-danger/10 border border-danger/20 rounded-xl p-3 mb-4"
+            >
+              <p className="text-danger text-xs font-bold uppercase tracking-wider">{welcomeError}</p>
+            </motion.div>
+          )}
+          <div className="space-y-3">
+            <Button size="xl" onClick={() => {
+              setWelcomeError(null);
+              setScreen('register');
+            }}>
+              Crear mi perfil
+            </Button>
+            <button 
+              onClick={() => {
+                const p = localStorage.getItem('gymbros_profile');
+                if (p) {
+                  setProfile(JSON.parse(p));
+                  setWelcomeError(null);
+                  setScreen('home');
+                } else {
+                  setWelcomeError('No se encontró un perfil guardado. Por favor, creá uno nuevo.');
+                }
+              }}
+              className="w-full py-4 text-sm font-bold uppercase tracking-widest text-text-muted hover:text-accent transition-all"
+            >
+              Ya tengo perfil
+            </button>
+          </div>
+          
+          <div className="pt-8 border-t border-border/20">
+            <a href="/vanilla-v2/index.html" className="inline-block text-[10px] text-text-muted uppercase tracking-widest hover:text-accent transition-colors">
+              PROBAR VERSIÓN VANILLA PWA (V2)
+            </a>
+          </div>
         </div>
       </div>
     </div>
   );
 
   const renderRegister = () => (
-    <div className="min-h-screen p-6 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="min-h-screen p-6 flex flex-col justify-center items-center space-y-8 text-center max-w-xs mx-auto">
+      <div className="w-full flex items-center justify-between mb-4">
         <button onClick={() => setScreen('welcome')} className="text-accent-light flex items-center gap-1">
           <ChevronLeft size={20} /> Atrás
         </button>
@@ -723,17 +784,17 @@ export default function App() {
         <div className="w-12" />
       </div>
 
-      <div className="text-center space-y-2">
-        <div className="text-5xl">🏋️</div>
+      <div className="space-y-2">
+        <div className="text-6xl">🏋️</div>
         <p className="text-text-muted text-sm">Contanos sobre vos para personalizar tu experiencia.</p>
       </div>
 
-      <div className="space-y-4">
-        <Input id="reg-name" label="¿Cómo te llamás?" placeholder="Tu nombre" />
+      <div className="space-y-6 w-full">
+        <Input id="reg-name" label="¿CÓMO TE LLAMÁS?" placeholder="Tu nombre" />
         <div className="grid grid-cols-2 gap-4">
-          <Input id="reg-age" label="Edad" type="number" placeholder="25" />
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Sexo</label>
+          <Input id="reg-age" label="EDAD" type="number" placeholder="25" />
+          <div className="space-y-2 text-left">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">SEXO</label>
             <div className="grid grid-cols-2 gap-2">
               <button 
                 onClick={() => setRegSex('M')}
@@ -757,8 +818,8 @@ export default function App() {
           </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Input id="reg-weight" label="Peso (kg)" type="number" placeholder="75" />
-          <Input id="reg-height" label="Altura (cm)" type="number" placeholder="175" />
+          <Input id="reg-weight" label="PESO (KG)" type="number" placeholder="75" />
+          <Input id="reg-height" label="ALTURA (CM)" type="number" placeholder="175" />
         </div>
         
         <Button size="xl" className="mt-8" onClick={handleRegister}>Empezar a entrenar 💪</Button>
@@ -767,13 +828,17 @@ export default function App() {
   );
 
   const renderHome = () => (
-    <div className="min-h-screen p-6 space-y-8">
+    <div className="min-h-screen p-6 space-y-8 relative">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-text-muted text-xs mb-1">{greetingByHour()}, {profile?.name}</p>
+          <p className="text-text-muted text-xs mb-1 uppercase tracking-widest font-bold opacity-70">
+            {greetingByHour()}, {profile?.name}
+          </p>
           <div className="flex items-center gap-2">
-            <span className="text-2xl drop-shadow-[0_0_8px_rgba(108,99,255,0.5)]">⚡</span>
-            <h2 className="font-display text-4xl tracking-wider">GYM<span className="text-accent-light">BROS</span></h2>
+            <span className="text-2xl drop-shadow-[0_0_8px_var(--shadow-accent)]">⚡</span>
+            <h2 className="font-display text-4xl tracking-wider">
+              GYM<span className="text-accent-light">BROS</span>
+            </h2>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -795,27 +860,31 @@ export default function App() {
 
       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
         <span className="bg-bg-card border border-border rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
-          {profile?.name}
+          USUARIO: {profile?.name}
         </span>
         <span className="bg-bg-card border border-border rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
-          {routines.length} rutinas
+          RUTINAS: {routines.length}
         </span>
         <span className="bg-bg-card border border-border rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
-          {Object.keys(history).length} registros
+          REGISTROS: {Object.keys(history).length}
         </span>
       </div>
 
       <Button size="xl" onClick={startNewRoutine}>
-        <Plus size={20} /> Nueva Rutina
+        <Plus size={24} /> Nueva Rutina
       </Button>
 
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted">Mis Rutinas</h3>
-          <button onClick={() => setScreen('progress')} className="text-accent-light text-[10px] font-bold uppercase tracking-widest">Ver Progreso</button>
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted">
+            MIS RUTINAS
+          </h3>
+          <button onClick={() => setScreen('progress')} className="text-accent-light text-[10px] font-bold uppercase tracking-widest">
+            Ver Progreso
+          </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {routines.length === 0 ? (
             <div className="text-center py-12 space-y-3 opacity-50">
               <div className="text-4xl">🏋️</div>
@@ -825,46 +894,24 @@ export default function App() {
             routines.map(r => (
               <div key={r.id} className="relative group">
                 <Card onClick={() => { setCtxDetailId(r.id); setScreen('routine-detail'); }}>
-                    <div className="flex items-start justify-between mb-2">
-                      <h4 className="text-lg font-bold">{r.name}</h4>
-                      <div className="flex items-center gap-1">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCtxRoutine(r);
-                            setCtxDay('Lunes');
-                            setCtxMuscle(null);
-                            setSearchQuery('');
-                            setScreen('create-routine');
-                          }}
-                          className="p-2 text-accent-light hover:bg-accent/10 rounded-xl transition-colors"
-                        >
-                          <Edit2 size={18} />
-                        </button>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setShowDeleteRoutineConfirm(r.id);
-                          }}
-                          className="p-2 text-red-400 hover:bg-red-400/10 rounded-xl transition-colors"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                    <div className="p-5">
+                      <div className="flex items-start justify-between mb-2">
+                        <h4 className="text-lg font-bold">{r.name}</h4>
+                      </div>
+                      <div className="flex gap-3 text-[10px] text-text-muted font-semibold">
+                        <span>{Object.keys(r.days).length} días</span>
+                        <span>{Object.values(r.days).reduce((acc: number, d) => acc + (d as { exercises: RoutineExercise[] }).exercises.length, 0)} ejercicios</span>
+                      </div>
+                      <div className="flex gap-1.5 mt-4 flex-wrap">
+                        {Object.keys(r.days)
+                          .sort((a, b) => DAYS_ORDER.indexOf(a) - DAYS_ORDER.indexOf(b))
+                          .map(d => (
+                          <span key={d} className="bg-accent/10 text-accent-light text-[9px] font-bold px-2.5 py-1 rounded-full uppercase">
+                            {d.slice(0, 3)}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                  <div className="flex gap-3 text-[10px] text-text-muted font-semibold">
-                    <span>{Object.keys(r.days).length} días</span>
-                    <span>{Object.values(r.days).reduce((acc: number, d) => acc + (d as { exercises: RoutineExercise[] }).exercises.length, 0)} ejercicios</span>
-                  </div>
-                  <div className="flex gap-1.5 mt-4">
-                    {Object.keys(r.days)
-                      .sort((a, b) => DAYS_ORDER.indexOf(a) - DAYS_ORDER.indexOf(b))
-                      .map(d => (
-                      <span key={d} className="bg-accent/10 text-accent-light text-[9px] font-bold px-2.5 py-1 rounded-full uppercase">
-                        {d.slice(0, 3)}
-                      </span>
-                    ))}
-                  </div>
                 </Card>
               </div>
             ))
@@ -877,7 +924,7 @@ export default function App() {
   const renderSelectMuscle = () => {
     const muscles = bodyFront ? MUSCLES_FRONT : MUSCLES_BACK;
     return (
-      <div className="min-h-screen p-6 space-y-6">
+      <div className="min-h-screen p-6 space-y-6 relative">
         <div className="flex items-center justify-between">
           <button onClick={() => { setCtxMuscle(null); setScreen('create-routine'); }} className="text-accent-light flex items-center gap-1">
             <ChevronLeft size={20} /> Atrás
@@ -1024,7 +1071,7 @@ export default function App() {
 
           <Button 
             variant="ghost" 
-            className="mt-4" 
+            className="mt-6" 
             onClick={() => setBodyFront(!bodyFront)}
           >
             <RotateCcw size={16} /> Girar Cuerpo
@@ -1057,7 +1104,7 @@ export default function App() {
   const renderExerciseList = () => {
     const exercises = ctxMuscle ? EXERCISES_DB[ctxMuscle] || [] : [];
     return (
-      <div className="min-h-screen p-6 space-y-6">
+      <div className="min-h-screen p-6 space-y-6 relative">
         <div className="flex items-center justify-between">
           <button 
             onClick={() => { 
@@ -1069,11 +1116,12 @@ export default function App() {
                 setScreen('select-muscle'); 
               }
             }} 
-            className="text-accent-light flex items-center gap-1"
-          >
+            className="text-accent-light flex items-center gap-1">
             <ChevronLeft size={20} /> Atrás
           </button>
-          <span className="font-semibold">Ejercicios</span>
+          <span className="font-semibold">
+            Ejercicios
+          </span>
           <div className="w-12" />
         </div>
 
@@ -1096,7 +1144,9 @@ export default function App() {
             <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent-light">
               <Plus size={24} />
             </div>
-            <span className="text-xs font-bold uppercase tracking-widest">Manual</span>
+            <span className="text-xs font-bold uppercase tracking-widest">
+              Manual
+            </span>
           </Card>
 
           {exercises.filter(ex => ex.name.toLowerCase().includes(searchQuery.toLowerCase())).map(ex => (
@@ -1131,7 +1181,7 @@ export default function App() {
   };
 
   const renderCreateRoutine = () => (
-    <div className="min-h-screen p-6 space-y-6">
+    <div className="min-h-screen p-6 space-y-8 relative">
       <div className="flex items-center justify-between">
         <button 
           onClick={() => {
@@ -1146,8 +1196,12 @@ export default function App() {
         >
           <ChevronLeft size={20} /> Atrás
         </button>
-        <span className="font-semibold">{ctxRoutine?.id && routines.find(r => r.id === ctxRoutine.id) ? 'Editar Rutina' : 'Nueva Rutina'}</span>
-        <button onClick={saveRoutine} className="text-accent-light font-bold text-sm">Guardar</button>
+        <span className="font-semibold">
+          {ctxRoutine?.id && routines.find(r => r.id === ctxRoutine.id) ? 'Editar Rutina' : 'Nueva Rutina'}
+        </span>
+        <button onClick={saveRoutine} className="text-accent-light font-bold text-sm">
+          Guardar
+        </button>
       </div>
 
       <div className="space-y-6">
@@ -1177,7 +1231,9 @@ export default function App() {
         </div>
 
         <div className="space-y-3">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Días de Entrenamiento</label>
+          <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">
+            Días de Entrenamiento
+          </label>
           <div className="grid grid-cols-4 gap-2">
             {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo', 'Todos'].map(day => (
               <button 
@@ -1205,7 +1261,7 @@ export default function App() {
 
         {ctxDay && (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between border-b border-border pb-2">
               <h4 className="text-sm font-bold text-accent-light">{ctxDay}</h4>
               <div className="flex items-center gap-3">
                 <button 
@@ -1224,10 +1280,12 @@ export default function App() {
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {ctxDay === 'Todos' ? (
                 <div className="text-center py-8 border border-dashed border-border rounded-2xl opacity-60 bg-accent/5">
-                  <p className="text-xs font-bold text-accent-light">Modo "Todos los días" activo</p>
+                  <p className="text-xs font-bold text-accent-light">
+                    Modo "Todos los días" activo
+                  </p>
                   <p className="text-[10px] mt-1 text-text-muted px-4">Los ejercicios que agregues se copiarán automáticamente a todos los días de la semana.</p>
                 </div>
               ) : (
@@ -1273,6 +1331,189 @@ export default function App() {
     </div>
   );
 
+  const renderProfile = () => (
+    <div className="min-h-screen p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <button 
+          onClick={() => {
+            if (isEditingProfile) setIsEditingProfile(false);
+            else setScreen('home');
+          }} 
+          className="text-accent-light flex items-center gap-1"
+        >
+          <ChevronLeft size={20} /> Atrás
+        </button>
+        <span className="font-semibold">Mi Perfil</span>
+        <button 
+          onClick={() => setIsEditingProfile(!isEditingProfile)}
+          className="text-accent-light font-bold text-sm"
+        >
+          {isEditingProfile ? 'Cancelar' : 'Editar'}
+        </button>
+      </div>
+      
+      {isEditingProfile ? (
+        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+          <Input 
+            label="Nombre" 
+            value={profile?.name || ''} 
+            onChange={(e) => setProfile(prev => prev ? { ...prev, name: e.target.value } : null)}
+          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input 
+              label="Edad" 
+              type="number" 
+              value={profile?.age || ''} 
+              onChange={(e) => setProfile(prev => prev ? { ...prev, age: parseInt(e.target.value) || 0 } : null)}
+            />
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">
+                Sexo
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button 
+                  onClick={() => setProfile(prev => prev ? { ...prev, sex: 'M' } : null)}
+                  className={cn(
+                    "border rounded-2xl py-3 text-sm font-semibold transition-all",
+                    profile?.sex === 'M' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
+                  )}
+                >♂ Masc</button>
+                <button 
+                  onClick={() => setProfile(prev => prev ? { ...prev, sex: 'F' } : null)}
+                  className={cn(
+                    "border rounded-2xl py-3 text-sm font-semibold transition-all",
+                    profile?.sex === 'F' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
+                  )}
+                >♀ Fem</button>
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Input 
+              label="Peso (kg)" 
+              type="number" 
+              value={profile?.weight || ''} 
+              onChange={(e) => setProfile(prev => prev ? { ...prev, weight: parseFloat(e.target.value) || 0 } : null)}
+            />
+            <Input 
+              label="Altura (cm)" 
+              type="number" 
+              value={profile?.height || ''} 
+              onChange={(e) => setProfile(prev => prev ? { ...prev, height: parseInt(e.target.value) || 0 } : null)}
+            />
+          </div>
+          <Button size="xl" className="mt-4" onClick={() => setIsEditingProfile(false)}>
+            Guardar Cambios
+          </Button>
+        </div>
+      ) : (
+        <>
+          <Card className="overflow-hidden p-0">
+            <div className="bg-accent/10 p-8 flex flex-col items-center gap-4">
+              <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center text-4xl font-bold text-white shadow-xl">
+                {profile?.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="text-center">
+                <h3 className="text-2xl font-bold">{profile?.name}</h3>
+                <p className="text-text-muted text-sm">
+                  {profile?.sex === 'M' ? 'Masculino' : profile?.sex === 'F' ? 'Femenino' : 'No especificado'} · {profile?.age} años
+                </p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 border-t border-border">
+              <div className="p-4 text-center border-r border-border">
+                <div className="font-display text-3xl text-accent-light">{profile?.weight}</div>
+                <div className="text-[9px] text-text-muted uppercase font-bold">MASA (KG)</div>
+              </div>
+              <div className="p-4 text-center border-r border-border">
+                <div className="font-display text-3xl text-accent-light">{profile?.height}</div>
+                <div className="text-[9px] text-text-muted uppercase font-bold">ALTURA (CM)</div>
+              </div>
+              <div className="p-4 text-center">
+                <div className="font-display text-3xl text-accent-light">
+                  {profile ? calculateBMI(profile.weight, profile.height) : 0}
+                </div>
+                <div className="text-[9px] text-text-muted uppercase font-bold">INDICE_IMC</div>
+              </div>
+            </div>
+            
+            {profile && (
+              <div className="px-6 py-3 bg-bg-card/30 border-t border-border flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">ESTADO_IMC</span>
+                <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-widest", 
+                  getBMICategory(Number(calculateBMI(profile.weight, profile.height))).color
+                )}>
+                  {getBMICategory(Number(calculateBMI(profile.weight, profile.height))).label.toUpperCase()}
+                </span>
+              </div>
+            )}
+          </Card>
+
+          <div className="space-y-4 mt-6">
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted px-1"># PREFERENCIAS_SISTEMA</h3>
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent-light">
+                    {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold">Modo Visual</p>
+                    <p className="text-[10px] text-text-muted">{theme.toUpperCase()}_PROTOCOLO</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className={cn(
+                    "w-12 h-6 rounded-full p-1 transition-all duration-300 relative border",
+                    theme === 'dark' ? "bg-accent border-accent" : "bg-bg-card border-border"
+                  )}
+                >
+                  <div className={cn(
+                    "w-4 h-4 rounded-full transition-all duration-300",
+                    theme === 'dark' ? "translate-x-6 bg-white" : "translate-x-0 bg-accent"
+                  )} />
+                </button>
+              </div>
+            </Card>
+          </div>
+
+          <div className="space-y-3">
+            <Button 
+              variant="ghost" 
+              size="xl" 
+              onClick={() => {
+                setProfile(null);
+                setScreen('welcome');
+              }}
+            >
+              <RotateCcw size={18} /> Cerrar Sesión
+            </Button>
+
+            <Button 
+              variant="danger-outline" 
+              size="xl" 
+              onClick={() => {
+                localStorage.clear();
+                window.location.reload();
+              }}
+            >
+              <Trash2 size={18} /> Borrar todos los datos
+            </Button>
+
+            <div className="pt-8 border-t border-border">
+              <a href="/vanilla-v2/index.html" className="block text-center text-[10px] text-accent uppercase tracking-widest hover:underline">
+                Cambiar a Versión Vanilla PWA (v2)
+              </a>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+
   const renderRoutineDetail = () => {
     const r = routines.find(r => r.id === ctxDetailId);
     if (!r) return null;
@@ -1284,12 +1525,12 @@ export default function App() {
             <ChevronLeft size={20} /> Mis Rutinas
           </button>
           <span className="font-semibold">Rutina</span>
-          <button onClick={() => { setCtxRoutine(r); setCtxDay('Lunes'); setCtxMuscle(null); setSearchQuery(''); setScreen('create-routine'); }} className="text-accent-light font-bold text-sm">Editar</button>
+          <button onClick={() => { setCtxRoutine(r); setCtxDay('Lunes'); setCtxMuscle(null); setSearchQuery(''); setScreen('create-routine'); }} className="text-accent-light font-bold text-sm">EDITAR</button>
         </div>
 
         <div className="space-y-8">
           <div className="flex items-center justify-between">
-            <h3 className="text-3xl font-display tracking-wider">{r.name}</h3>
+            <h3 className="text-3xl font-display tracking-wider uppercase">{r.name}</h3>
             <button 
               onClick={() => setShowStopwatch(true)}
               className="p-3 bg-accent/10 text-accent-light rounded-2xl hover:bg-accent/20 transition-colors flex items-center gap-2"
@@ -1312,7 +1553,9 @@ export default function App() {
                     onClick={() => setExpandedDays(prev => ({ ...prev, [day]: !isExpanded }))}
                     className="w-full flex items-center gap-3 group"
                   >
-                    <span className="bg-accent text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">{day}</span>
+                    <span className="bg-accent text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">
+                      Día: {day}
+                    </span>
                     <div className="h-px flex-1 bg-border" />
                     <div className="text-text-muted group-hover:text-accent-light transition-colors">
                       {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -1334,7 +1577,9 @@ export default function App() {
                                       {ex.muscles[0] || 'Gral'}
                                     </span>
                                   </div>
-                                  <p className="text-[10px] text-text-muted">{ex.muscles.join(', ')}</p>
+                                  <p className="text-[10px] text-text-muted">
+                                    Músculos: {ex.muscles.join(', ')}
+                                  </p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-1">
@@ -1372,9 +1617,9 @@ export default function App() {
                             <table className="w-full text-center">
                             <thead>
                               <tr className="text-[9px] uppercase tracking-widest text-text-muted">
-                                <th className="pb-2">Serie</th>
-                                <th className="pb-2">Reps</th>
-                                <th className="pb-2">Carga</th>
+                                <th className="pb-2">SERIE</th>
+                                <th className="pb-2">REPS</th>
+                                <th className="pb-2">CARGA</th>
                               </tr>
                             </thead>
                             <tbody className="text-sm font-bold">
@@ -1390,7 +1635,7 @@ export default function App() {
                           {ex.note && (
                             <div className="mt-4 pt-3 border-t border-border">
                               <p className="text-[10px] text-text-muted leading-relaxed italic">
-                                <span className="font-bold uppercase not-italic mr-1">Nota:</span> {ex.note}
+                                <span className="font-bold uppercase not-italic mr-1">NOTA:</span> {ex.note}
                               </p>
                             </div>
                           )}
@@ -1407,7 +1652,7 @@ export default function App() {
                           setReturnToDetail(true);
                           setScreen('select-muscle');
                         }}
-                        className="w-full py-4 rounded-2xl border border-dashed border-border text-accent-light text-xs font-bold flex items-center justify-center gap-2 hover:bg-accent/5 transition-colors"
+                        className="w-full py-4 rounded-2xl border border-dashed border-border text-accent-light text-xs font-bold flex items-center justify-center gap-2 hover:bg-accent/5 transition-colors uppercase"
                       >
                         <Plus size={14} /> Agregar Ejercicio a {day}
                       </button>
@@ -1430,7 +1675,7 @@ export default function App() {
             size="xl" 
             onClick={() => setShowDeleteRoutineConfirm(r.id)}
           >
-            <Trash2 size={18} /> Eliminar Rutina
+            <Trash2 size={18} /> ELIMINAR RUTINA
           </Button>
         </div>
       </div>
@@ -1455,7 +1700,7 @@ export default function App() {
         {keys.length === 0 ? (
           <div className="text-center py-20 opacity-50 space-y-4">
             <TrendingUp size={48} className="mx-auto" />
-            <p>Aún no hay historial.<br/>Entrená para ver tu progreso.</p>
+            <p>Aún no hay datos de progreso.<br/>¡Empezá a entrenar para ver tus avances!</p>
           </div>
         ) : (
           <>
@@ -1466,10 +1711,12 @@ export default function App() {
                   onClick={() => setCtxDetailId(k)}
                   className={cn(
                     "px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all",
-                    ctxDetailId === k ? "bg-accent text-white" : "bg-bg-card text-text-muted border border-border"
+                    ctxDetailId === k 
+                      ? "bg-accent text-white" 
+                      : "bg-bg-card text-text-muted border border-border"
                   )}
                 >
-                  {history[k].exerciseName}
+                  {history[k].exerciseName.toUpperCase()}
                 </button>
               ))}
             </div>
@@ -1477,7 +1724,7 @@ export default function App() {
             {data && (
               <div className="space-y-6">
                 <Card className="p-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-4">Peso Máximo (kg)</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted mb-4">CARGA MÁXIMA (KG)</h4>
                   <div className="h-48 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={data.entries}>
@@ -1500,7 +1747,14 @@ export default function App() {
                           tickFormatter={(val) => `${val}kg`}
                         />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: 'none', borderRadius: '12px', fontSize: '12px', color: 'var(--text)' }}
+                          contentStyle={{ 
+                            backgroundColor: 'var(--bg-card)', 
+                            border: 'none', 
+                            borderRadius: '12px', 
+                            fontSize: '12px', 
+                            color: 'var(--text)',
+                            fontFamily: 'inherit'
+                          }}
                         />
                         <Area type="monotone" dataKey="maxWeight" stroke="#6C63FF" fillOpacity={1} fill="url(#colorWeight)" strokeWidth={2} />
                       </AreaChart>
@@ -1509,13 +1763,13 @@ export default function App() {
                 </Card>
 
                 <div className="space-y-3">
-                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Historial de Sesiones</h4>
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">HISTORIAL DE SESIONES</h4>
                   {data.entries.slice().reverse().map((e, i) => (
                     <div key={i} className="flex items-center justify-between p-4 bg-bg-soft rounded-2xl border border-border">
-                      <span className="text-xs text-text-muted font-semibold">{friendlyDate(e.date)}</span>
+                      <span className="text-xs text-text-muted font-semibold">{friendlyDate(e.date).toUpperCase()}</span>
                       <div className="text-right">
-                        <div className="text-sm font-bold">{e.maxWeight}kg <span className="text-text-muted font-normal">max</span></div>
-                        <div className="text-[10px] text-text-muted">{e.totalReps} reps totales</div>
+                        <div className="text-sm font-bold">{e.maxWeight}KG <span className="text-text-muted font-normal">MÁX</span></div>
+                        <div className="text-[10px] text-text-muted">REPS TOTALES: {e.totalReps}</div>
                       </div>
                     </div>
                   ))}
@@ -1529,7 +1783,7 @@ export default function App() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-bg min-h-screen font-sans selection:bg-accent/30 overflow-x-hidden">
+    <div className="max-w-md mx-auto bg-bg min-h-screen font-sans selection:bg-accent/30 overflow-x-hidden relative">
       <AnimatePresence mode="wait">
         <motion.div
           key={screen}
@@ -1563,9 +1817,12 @@ export default function App() {
             />
           )}
           {screen === 'routine-detail' && renderRoutineDetail()}
+          {screen === 'profile' && renderProfile()}
+        </motion.div>
+      </AnimatePresence>
 
-          <AnimatePresence>
-            {showStopwatch && (
+      <AnimatePresence>
+        {showStopwatch && (
               <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -1662,179 +1919,6 @@ export default function App() {
           </AnimatePresence>
           
           {/* Other screens would be implemented similarly */}
-          {screen === 'profile' && (
-            <div className="min-h-screen p-6 space-y-6">
-               <div className="flex items-center justify-between">
-                <button 
-                  onClick={() => {
-                    if (isEditingProfile) setIsEditingProfile(false);
-                    else setScreen('home');
-                  }} 
-                  className="text-accent-light flex items-center gap-1"
-                >
-                  <ChevronLeft size={20} /> Atrás
-                </button>
-                <span className="font-semibold">Mi Perfil</span>
-                <button 
-                  onClick={() => setIsEditingProfile(!isEditingProfile)}
-                  className="text-accent-light font-bold text-sm"
-                >
-                  {isEditingProfile ? 'Cancelar' : 'Editar'}
-                </button>
-              </div>
-              
-              {isEditingProfile ? (
-                <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-                  <Input 
-                    label="Nombre" 
-                    value={profile?.name || ''} 
-                    onChange={(e) => setProfile(prev => prev ? { ...prev, name: e.target.value } : null)}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input 
-                      label="Edad" 
-                      type="number" 
-                      value={profile?.age || ''} 
-                      onChange={(e) => setProfile(prev => prev ? { ...prev, age: parseInt(e.target.value) || 0 } : null)}
-                    />
-                    <div className="space-y-2">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Sexo</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button 
-                          onClick={() => setProfile(prev => prev ? { ...prev, sex: 'M' } : null)}
-                          className={cn(
-                            "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                            profile?.sex === 'M' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
-                          )}
-                        >♂ Masc</button>
-                        <button 
-                          onClick={() => setProfile(prev => prev ? { ...prev, sex: 'F' } : null)}
-                          className={cn(
-                            "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                            profile?.sex === 'F' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
-                          )}
-                        >♀ Fem</button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input 
-                      label="Peso (kg)" 
-                      type="number" 
-                      value={profile?.weight || ''} 
-                      onChange={(e) => setProfile(prev => prev ? { ...prev, weight: parseFloat(e.target.value) || 0 } : null)}
-                    />
-                    <Input 
-                      label="Altura (cm)" 
-                      type="number" 
-                      value={profile?.height || ''} 
-                      onChange={(e) => setProfile(prev => prev ? { ...prev, height: parseInt(e.target.value) || 0 } : null)}
-                    />
-                  </div>
-                  <Button size="xl" className="mt-4" onClick={() => setIsEditingProfile(false)}>Guardar Cambios</Button>
-                </div>
-              ) : (
-                <>
-                  <Card className="overflow-hidden p-0">
-                    <div className="bg-accent/10 p-8 flex flex-col items-center gap-4">
-                      <div className="w-24 h-24 rounded-full bg-accent flex items-center justify-center text-4xl font-bold text-white shadow-xl">
-                        {profile?.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div className="text-center">
-                        <h3 className="text-2xl font-bold">{profile?.name}</h3>
-                        <p className="text-text-muted text-sm">{profile?.sex === 'M' ? 'Masculino' : profile?.sex === 'F' ? 'Femenino' : 'No especificado'} · {profile?.age} años</p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 border-t border-border">
-                      <div className="p-4 text-center border-r border-border">
-                        <div className="font-display text-3xl text-accent-light">{profile?.weight}</div>
-                        <div className="text-[9px] text-text-muted uppercase font-bold">Peso (kg)</div>
-                      </div>
-                      <div className="p-4 text-center border-r border-border">
-                        <div className="font-display text-3xl text-accent-light">{profile?.height}</div>
-                        <div className="text-[9px] text-text-muted uppercase font-bold">Altura (cm)</div>
-                      </div>
-                      <div className="p-4 text-center">
-                        <div className="font-display text-3xl text-accent-light">
-                          {profile ? calculateBMI(profile.weight, profile.height) : 0}
-                        </div>
-                        <div className="text-[9px] text-text-muted uppercase font-bold">IMC</div>
-                      </div>
-                    </div>
-                    
-                    {profile && (
-                      <div className="px-6 py-3 bg-bg-card/30 border-t border-border flex items-center justify-between">
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Estado IMC</span>
-                        <span className={cn("text-[10px] font-bold uppercase tracking-widest", getBMICategory(Number(calculateBMI(profile.weight, profile.height))).color)}>
-                          {getBMICategory(Number(calculateBMI(profile.weight, profile.height))).label}
-                        </span>
-                      </div>
-                    )}
-                  </Card>
-
-                  <div className="space-y-4 mt-6">
-                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted px-1">Preferencias</h3>
-                    <Card className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent-light">
-                            {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold">Modo {theme === 'dark' ? 'Oscuro' : 'Claro'}</p>
-                            <p className="text-[10px] text-text-muted">Cambiar el tema de la aplicación</p>
-                          </div>
-                        </div>
-                        <button 
-                          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                          className={cn(
-                            "w-12 h-6 rounded-full p-1 transition-all duration-300 relative border",
-                            theme === 'dark' ? "bg-accent border-accent" : "bg-bg-card border-border"
-                          )}
-                        >
-                          <div className={cn(
-                            "w-4 h-4 rounded-full transition-all duration-300",
-                            theme === 'dark' ? "translate-x-6 bg-white" : "translate-x-0 bg-accent"
-                          )} />
-                        </button>
-                      </div>
-                    </Card>
-                  </div>
-
-                  <div className="space-y-3">
-                    <Button 
-                      variant="ghost" 
-                      size="xl" 
-                      onClick={() => {
-                        setProfile(null);
-                        setScreen('welcome');
-                      }}
-                    >
-                      <RotateCcw size={18} /> Cerrar Sesión
-                    </Button>
-
-                    <Button 
-                      variant="danger-outline" 
-                      size="xl" 
-                      onClick={() => {
-                        localStorage.clear();
-                        window.location.reload();
-                      }}
-                    >
-                      <Trash2 size={18} /> Borrar todos los datos
-                    </Button>
-
-                    <div className="pt-8 border-t border-border">
-                      <a href="/vanilla-v2/index.html" className="block text-center text-[10px] text-accent uppercase tracking-widest hover:underline">
-                        Cambiar a Versión Vanilla PWA (v2)
-                      </a>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
           <AnimatePresence>
             {showDeleteRoutineConfirm && (
               <div className="fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
@@ -1931,9 +2015,6 @@ export default function App() {
               </div>
             )}
           </AnimatePresence>
-
-        </motion.div>
-      </AnimatePresence>
     </div>
   );
 }
