@@ -33,13 +33,12 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
       muscles: ['Hombros','Trapecio'], 
       desc: 'Trabaja el deltoides lateral. Eleva los brazos hasta la altura de los hombros manteniendo leve flexión.', 
       instructions: [
-        'Parate derecho con una mancuerna en cada mano a los costados.',
-        'Mantené una leve flexión en los codos y la espalda bien derecha.',
-        'Levantá las mancuernas hacia los costados hasta que tus brazos estén paralelos al piso.',
+        'Parate derecho con una mancuerna en cada mano a los costados del cuerpo.',
+        'Elevá las mancuernas hacia los costados hasta que tus brazos estén paralelos al piso.',
+        'Mantené una leve flexión en los codos durante todo el movimiento.',
         'Bajá las pesas de forma controlada hasta la posición inicial.',
-        'Evitá balancear el cuerpo para subir el peso.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+        'No uses el balanceo del cuerpo para subir el peso, concentrate en el hombro.'
+      ]
     },
     { 
       id: 'e_hom_2', 
@@ -181,8 +180,7 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Bajá la barra lentamente hasta que toque la mitad de tu pecho.',
         'Empujá la barra con fuerza hacia arriba hasta extender los brazos.',
         'Mantené los omóplatos retraídos contra el banco durante todo el movimiento.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+      ]
     },
     { 
       id: 'e_pec_2', 
@@ -325,7 +323,6 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Bajá la barra lentamente hasta la posición inicial.',
         'No uses el balanceo del cuerpo para subir el peso.'
       ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
     },
     { 
       id: 'e_bic_2', 
@@ -339,8 +336,7 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Levantá las pesas flexionando los codos hasta que las mancuernas lleguen al nivel de los hombros.',
         'Bajá las pesas de forma controlada.',
         'Mantené el torso quieto durante todo el ejercicio.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+      ]
     },
     { 
       id: 'e_bic_3', 
@@ -454,8 +450,7 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Empujá el agarre hacia abajo hasta que tus brazos estén completamente extendidos.',
         'Subí el agarre lentamente hasta que tus antebrazos estén paralelos al piso.',
         'Mantené la espalda derecha y el core firme.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+      ]
     },
     { 
       id: 'e_tri_2', 
@@ -583,8 +578,7 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Mantené el pecho inflado y tratá de llevar los codos hacia tus costados.',
         'Bajá lentamente hasta que tus brazos estén casi extendidos.',
         'Evitá el balanceo excesivo de las piernas.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+      ]
     },
     { 
       id: 'e_dor_2', 
@@ -784,8 +778,7 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Elevá los hombros del piso contrayendo los abdominales.',
         'Mantené la contracción un segundo y bajá lentamente.',
         'No hagas fuerza con el cuello, concentrate en el abdomen.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+      ]
     },
     { 
       id: 'e_abd_2', 
@@ -1029,8 +1022,7 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Empujá la cadera hacia arriba hasta que el cuerpo quede paralelo al piso.',
         'Apretá fuerte los glúteos en la parte superior.',
         'Bajá la cadera de forma controlada sin llegar a tocar el piso.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+      ]
     },
     { 
       id: 'e_glu_2', 
@@ -1144,8 +1136,7 @@ export const EXERCISES_DB: { [key: string]: Exercise[] } = {
         'Mantené la espalda derecha y el pecho inflado.',
         'Bajá hasta que tus muslos estén al menos paralelos al piso.',
         'Subí empujando con toda la planta del pie hasta la posición inicial.'
-      ],
-      gifUrl: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6Z3R6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/3o7TKMGpxXFQC9cc4U/giphy.gif' 
+      ]
     },
     { 
       id: 'e_cua_2', 

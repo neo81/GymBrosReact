@@ -17,7 +17,9 @@ import {
   Search,
   TrendingUp,
   X,
-  Clock
+  Clock,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { 
   LineChart, 
@@ -37,6 +39,34 @@ import { cn, genId, dateStrAR, friendlyDate, greetingByHour } from './utils';
 
 // --- Components ---
 
+const ExerciseIcon = ({ ex, className, size = 'md' }: { ex: Exercise | null; className?: string; size?: 'sm' | 'md' | 'lg' }) => {
+  const [error, setError] = useState(false);
+  
+  const iconSizes = {
+    sm: 'text-2xl',
+    md: 'text-4xl',
+    lg: 'text-6xl',
+  };
+
+  if (!ex?.gifUrl || error) {
+    return (
+      <div className={cn("flex items-center justify-center", className)}>
+        <span className={cn("animate-bob", iconSizes[size])}>{ex?.emoji || '🏋️'}</span>
+      </div>
+    );
+  }
+
+  return (
+    <img 
+      src={ex.gifUrl} 
+      alt={ex.name} 
+      className={cn("w-full h-full object-cover", className)} 
+      referrerPolicy="no-referrer"
+      onError={() => setError(true)}
+    />
+  );
+};
+
 interface ConfigureExerciseProps {
   ctxExercise: Exercise | null;
   ctxRoutine: Routine | null;
@@ -50,7 +80,11 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
   const ex = ctxExercise;
   const initialSeries = ctxEditingIdx !== null && ctxRoutine && ctxDay 
     ? ctxRoutine.days[ctxDay].exercises[ctxEditingIdx].series 
-    : [{ reps: '', weight: '' }, { reps: '', weight: '' }, { reps: '', weight: '' }];
+    : [
+        { reps: '', weight: '', unit: 'kg' as const }, 
+        { reps: '', weight: '', unit: 'kg' as const }, 
+        { reps: '', weight: '', unit: 'kg' as const }
+      ];
   const initialNote = ctxEditingIdx !== null && ctxRoutine && ctxDay 
     ? ctxRoutine.days[ctxDay].exercises[ctxEditingIdx].note 
     : '';
@@ -70,12 +104,8 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
       </div>
 
       <Card className="flex items-center gap-4 relative">
-        <div className="w-16 h-16 bg-bg-card rounded-2xl flex items-center justify-center text-4xl overflow-hidden">
-          {ex?.gifUrl ? (
-            <img src={ex.gifUrl} alt={ex.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-          ) : (
-            <span className="animate-bob">{ex?.emoji}</span>
-          )}
+        <div className="w-16 h-16 bg-bg-card rounded-2xl flex items-center justify-center overflow-hidden">
+          <ExerciseIcon ex={ex} size="md" />
         </div>
         <div className="flex-1">
           <h4 className="font-bold">{ex?.name}</h4>
@@ -92,17 +122,31 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
           <h5 className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Series</h5>
-          <button 
-            onClick={() => setSeries([...series, { reps: '', weight: '' }])}
-            className="text-accent-light text-[10px] font-bold uppercase tracking-widest"
-          >
-            + Agregar Serie
-          </button>
+          <div className="flex items-center gap-3">
+            <select 
+              className="bg-bg-card border border-border rounded-lg px-2 py-1 text-[9px] font-bold uppercase text-accent-light outline-none"
+              value={series[0]?.unit || 'kg'}
+              onChange={(e) => {
+                const newUnit = e.target.value as 'kg' | 'min' | 'seg';
+                setSeries(series.map(s => ({ ...s, unit: newUnit })));
+              }}
+            >
+              <option value="kg">Kilo (KG)</option>
+              <option value="min">Minuto (MIN)</option>
+              <option value="seg">Segundo (SEG)</option>
+            </select>
+            <button 
+              onClick={() => setSeries([...series, { reps: '', weight: '', unit: series[0]?.unit || 'kg' }])}
+              className="text-accent-light text-[10px] font-bold uppercase tracking-widest"
+            >
+              + Agregar Serie
+            </button>
+          </div>
         </div>
 
         <div className="space-y-3">
           {series.map((s, i) => (
-            <div key={i} className="flex items-center gap-3 bg-bg-soft border border-white/5 rounded-2xl p-3">
+            <div key={i} className="flex items-center gap-3 bg-bg-soft border border-border rounded-2xl p-3">
               <div className="w-8 h-8 rounded-full bg-bg-card flex items-center justify-center text-xs font-bold text-text-muted">
                 {i + 1}
               </div>
@@ -110,8 +154,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                 <div className="relative">
                   <input 
                     type="number" 
-                    placeholder="Reps"
-                    className="w-full bg-bg-card border border-white/10 rounded-xl px-3 py-2 text-base text-center outline-none focus:border-accent"
+                    className="w-full bg-bg-card border border-border rounded-xl px-3 py-2 text-base text-text text-center outline-none focus:border-accent"
                     value={s.reps}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -135,8 +178,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                 <div className="relative">
                   <input 
                     type="number" 
-                    placeholder="Peso"
-                    className="w-full bg-bg-card border border-white/10 rounded-xl px-3 py-2 text-base text-center outline-none focus:border-accent"
+                    className="w-full bg-bg-card border border-border rounded-xl px-3 py-2 text-base text-text text-center outline-none focus:border-accent"
                     value={s.weight}
                     onChange={(e) => {
                       const val = e.target.value;
@@ -155,7 +197,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
                       setSeries(newSeries);
                     }}
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-bold text-text-muted pointer-events-none">KG</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-bold text-text-muted pointer-events-none uppercase">{s.unit || 'kg'}</span>
                 </div>
               </div>
               <button 
@@ -172,7 +214,7 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
       <div className="space-y-2">
         <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Notas</label>
         <textarea 
-          className="w-full bg-bg-card border border-white/10 rounded-2xl px-4 py-3.5 text-base text-white placeholder:text-white/20 outline-none focus:border-accent resize-none h-24"
+          className="w-full bg-bg-card border border-border rounded-2xl px-4 py-3.5 text-base text-text placeholder:text-text-muted/40 outline-none focus:border-accent resize-none h-24"
           placeholder="Ej: Enfocarse en la fase excéntrica..."
           value={note}
           onChange={(e) => setNote(e.target.value)}
@@ -186,24 +228,20 @@ const ConfigureExercise = ({ ctxExercise, ctxRoutine, ctxDay, ctxEditingIdx, onB
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="bg-bg-card border border-white/10 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
+              className="bg-bg-card border border-border rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
             >
               <div className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xl font-bold flex items-center gap-2">
                     <Info className="text-accent" size={20} /> Información
                   </h3>
-                  <button onClick={() => setShowInfo(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                  <button onClick={() => setShowInfo(false)} className="p-2 hover:bg-bg-soft rounded-full transition-colors">
                     <X size={20} />
                   </button>
                 </div>
 
-                <div className="aspect-video bg-bg-soft rounded-2xl overflow-hidden flex items-center justify-center text-6xl">
-                  {ex?.gifUrl ? (
-                    <img src={ex.gifUrl} alt={ex.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    ex?.emoji
-                  )}
+                <div className="aspect-video bg-bg-soft rounded-2xl overflow-hidden flex items-center justify-center">
+                  <ExerciseIcon ex={ex} size="lg" />
                 </div>
 
                 <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
@@ -259,7 +297,7 @@ const Button = ({
 }) => {
   const variants = {
     primary: 'bg-accent text-white shadow-[0_4px_24px_rgba(108,99,255,0.32)] active:scale-95',
-    ghost: 'bg-bg-card text-text-muted border border-white/10 active:scale-95',
+    ghost: 'bg-bg-card text-text-muted border border-border active:scale-95',
     danger: 'bg-danger text-white active:scale-95',
     'danger-outline': 'bg-danger/10 text-danger border border-danger active:scale-95',
   };
@@ -289,7 +327,7 @@ const Button = ({
 const Card = ({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) => (
   <div 
     onClick={onClick}
-    className={cn('bg-bg-soft border border-white/5 rounded-3xl p-5 shadow-xl', onClick && 'cursor-pointer active:scale-[0.98] transition-transform', className)}
+    className={cn('bg-bg-soft border border-border rounded-3xl p-5 shadow-xl', onClick && 'cursor-pointer active:scale-[0.98] transition-transform', className)}
   >
     {children}
   </div>
@@ -300,7 +338,7 @@ const Input = ({ label, className, ...props }: React.InputHTMLAttributes<HTMLInp
     {label && <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">{label}</label>}
     <input 
       className={cn(
-        "w-full bg-bg-card border border-white/10 rounded-2xl px-4 py-3.5 text-base text-white placeholder:text-white/20 outline-none focus:border-accent transition-colors",
+        "w-full bg-bg-card border border-border rounded-2xl px-4 py-3.5 text-base text-text placeholder:text-text-muted/40 outline-none focus:border-accent transition-colors",
         className
       )}
       {...props}
@@ -320,6 +358,27 @@ export default function App() {
   const [history, setHistory] = useState<AppHistory>({});
   const [favs, setFavs] = useState<string[]>([]);
   const [customEx, setCustomEx] = useState<Exercise[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+
+  // Theme logic
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('gymbros_theme') as 'light' | 'dark' | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('gymbros_theme', theme);
+  }, [theme]);
+
   const [regSex, setRegSex] = useState<'M' | 'F'>('M');
   
   // Context state
@@ -352,23 +411,27 @@ export default function App() {
     let interval: any;
     if (isStopwatchRunning) {
       interval = setInterval(() => {
-        setStopwatchTime(prev => prev + 1);
-      }, 1000);
+        setStopwatchTime(prev => prev + 10);
+      }, 10);
     } else {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
   }, [isStopwatchRunning]);
 
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return [
+  const formatTime = (ms: number) => {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    const ms_part = Math.floor((ms % 1000) / 10);
+    
+    const parts = [
       h > 0 ? h.toString().padStart(2, '0') : null,
       m.toString().padStart(2, '0'),
       s.toString().padStart(2, '0')
-    ].filter(Boolean).join(':');
+    ].filter(Boolean);
+    
+    return parts.join(':') + '.' + ms_part.toString().padStart(2, '0');
   };
 
   // Load data
@@ -637,7 +700,11 @@ export default function App() {
         
         <div className="space-y-3">
           <Button size="xl" onClick={() => setScreen('register')}>Crear mi perfil</Button>
-          <Button size="xl" variant="ghost" onClick={() => profile && setScreen('home')}>Ya tengo perfil</Button>
+          <Button size="xl" variant="ghost" onClick={() => {
+            const p = localStorage.getItem('gymbros_profile');
+            if (p) setProfile(JSON.parse(p));
+            setScreen('home');
+          }}>Ya tengo perfil</Button>
           <a href="/vanilla-v2/index.html" className="block text-center text-[10px] text-text-muted uppercase tracking-widest mt-4 hover:text-accent transition-colors">
             Probar Versión Vanilla PWA (v2)
           </a>
@@ -672,7 +739,7 @@ export default function App() {
                 onClick={() => setRegSex('M')}
                 className={cn(
                   "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                  regSex === 'M' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-white/10 text-text-muted"
+                  regSex === 'M' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-border text-text-muted"
                 )}
               >
                 ♂ Masc
@@ -681,7 +748,7 @@ export default function App() {
                 onClick={() => setRegSex('F')}
                 className={cn(
                   "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                  regSex === 'F' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-white/10 text-text-muted"
+                  regSex === 'F' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-border text-text-muted"
                 )}
               >
                 ♀ Fem
@@ -709,22 +776,31 @@ export default function App() {
             <h2 className="font-display text-4xl tracking-wider">GYM<span className="text-accent-light">BROS</span></h2>
           </div>
         </div>
-        <button 
-          onClick={() => setScreen('profile')}
-          className="w-11 h-11 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center text-accent-light font-bold"
-        >
-          {profile?.name.charAt(0).toUpperCase() || '?'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="w-11 h-11 rounded-full bg-bg-card border border-border flex items-center justify-center text-text transition-all hover:bg-accent/10"
+            title={theme === 'dark' ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+          <button 
+            onClick={() => setScreen('profile')}
+            className="w-11 h-11 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center text-accent-light font-bold"
+          >
+            {profile?.name.charAt(0).toUpperCase() || '?'}
+          </button>
+        </div>
       </div>
 
       <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
-        <span className="bg-bg-card border border-white/5 rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
+        <span className="bg-bg-card border border-border rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
           {profile?.name}
         </span>
-        <span className="bg-bg-card border border-white/5 rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
+        <span className="bg-bg-card border border-border rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
           {routines.length} rutinas
         </span>
-        <span className="bg-bg-card border border-white/5 rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
+        <span className="bg-bg-card border border-border rounded-full px-4 py-1.5 text-[10px] font-bold whitespace-nowrap">
           {Object.keys(history).length} registros
         </span>
       </div>
@@ -811,12 +887,12 @@ export default function App() {
         </div>
 
         <div className="relative flex flex-col items-center">
-          <div className="w-full max-w-[320px] aspect-[4/5] relative bg-bg-soft/50 rounded-[40px] border border-white/5 overflow-hidden shadow-2xl">
+          <div className="w-full max-w-[320px] aspect-[4/5] relative bg-bg-card/80 rounded-[40px] border border-border overflow-hidden shadow-2xl">
             <svg viewBox="0 0 320 400" className="w-full h-full">
               <defs>
                 <radialGradient id="bodyGrad" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#2D2D50" />
-                  <stop offset="100%" stopColor="#1E1E38" />
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.1" />
                 </radialGradient>
                 <filter id="glow">
                   <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -828,7 +904,7 @@ export default function App() {
               </defs>
               
               {/* Sharper Athletic Silhouette */}
-              <g fill="url(#bodyGrad)" opacity="0.9" stroke="#ffffff" strokeWidth="0.5" strokeOpacity="0.2">
+              <g fill="url(#bodyGrad)" opacity="0.9" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.2" className="text-text">
                 {/* Head */}
                 <ellipse cx="160" cy="30" rx="10" ry="14" />
                 {/* Neck */}
@@ -851,7 +927,7 @@ export default function App() {
               </g>
 
               {/* Muscle Group Segments */}
-              <g fill="#ffffff" fillOpacity="0.06" stroke="white" strokeWidth="0.3" strokeOpacity="0.1">
+              <g fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.2" className="text-text">
                 {bodyFront ? (
                   <>
                     {/* Pectorals */}
@@ -882,7 +958,7 @@ export default function App() {
               </g>
 
               {/* Anatomical Definition Lines */}
-              <g fill="none" stroke="white" strokeWidth="0.4" strokeOpacity="0.15">
+              <g fill="none" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.2" className="text-text">
                 <path d="M160 65 V220" />
                 {bodyFront && (
                   <>
@@ -906,8 +982,10 @@ export default function App() {
                     />
                     <circle 
                       cx={m.cx} cy={m.cy} r={m.r} 
-                      fill={ctxMuscle === m.id ? "#6C63FF" : "rgba(108,99,255,0.2)"}
-                      stroke={ctxMuscle === m.id ? "#8B84FF" : "rgba(108,99,255,0.4)"}
+                      fill={ctxMuscle === m.id ? "var(--accent)" : "var(--accent)"}
+                      fillOpacity={ctxMuscle === m.id ? "1" : "0.2"}
+                      stroke={ctxMuscle === m.id ? "var(--accent-light)" : "var(--accent)"}
+                      strokeOpacity={ctxMuscle === m.id ? "1" : "0.4"}
                       strokeWidth="1.5"
                       filter={ctxMuscle === m.id ? "url(#glow)" : ""}
                       className="transition-all duration-300 group-hover:fill-accent/60 group-hover:r-[110%]"
@@ -916,12 +994,13 @@ export default function App() {
                       x1={m.cx} y1={m.cy} 
                       x2={m.cx > 160 ? m.cx + 25 : m.cx - 25} 
                       y2={m.cy} 
-                      stroke="white" strokeOpacity="0.2" strokeWidth="1"
+                      stroke="currentColor" strokeOpacity="0.2" strokeWidth="1"
+                      className="text-text"
                     />
                     <text 
                       x={m.cx > 160 ? m.cx + 30 : m.cx - 30} 
                       y={m.cy + 4} 
-                      className="text-[9px] font-bold fill-white/80 pointer-events-none uppercase tracking-tighter"
+                      className="text-[9px] font-bold fill-current text-text/80 pointer-events-none uppercase tracking-tighter"
                       textAnchor={m.cx > 160 ? "start" : "end"}
                     >
                       {m.label}
@@ -936,7 +1015,7 @@ export default function App() {
               onClick={() => selectMuscle('core')}
               className={cn(
                 "absolute bottom-6 right-6 px-4 py-2 rounded-full text-xs font-bold transition-all border",
-                ctxMuscle === 'core' ? "bg-accent text-white border-accent" : "bg-bg-card text-text-muted border-white/10"
+                ctxMuscle === 'core' ? "bg-accent text-white border-accent" : "bg-bg-card text-text-muted border-border"
               )}
             >
               Core
@@ -962,7 +1041,7 @@ export default function App() {
                 onClick={() => selectMuscle(m.id)}
                 className={cn(
                   "px-4 py-2 rounded-full text-xs font-bold transition-all",
-                  ctxMuscle === m.id ? "bg-accent text-white" : "bg-bg-card text-text-muted border border-white/10",
+                  ctxMuscle === m.id ? "bg-accent text-white" : "bg-bg-card text-text-muted border border-border",
                   isDisabled && "opacity-20"
                 )}
               >
@@ -1003,7 +1082,7 @@ export default function App() {
           <input 
             type="text" 
             placeholder="Buscar ejercicio..."
-            className="w-full bg-bg-card border border-white/10 rounded-2xl pl-12 pr-4 py-3.5 text-base text-white outline-none focus:border-accent"
+            className="w-full bg-bg-card border border-border rounded-2xl pl-12 pr-4 py-3.5 text-base text-text outline-none focus:border-accent"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -1024,15 +1103,11 @@ export default function App() {
             <div key={ex.id}>
               <Card onClick={() => addExerciseToRoutine(ex)}>
                 <div className="aspect-square bg-bg-card rounded-2xl mb-3 flex items-center justify-center overflow-hidden relative">
-                  {ex.gifUrl ? (
-                    <img src={ex.gifUrl} alt={ex.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <span className="text-5xl animate-bob">{ex.emoji}</span>
-                  )}
+                  <ExerciseIcon ex={ex} size="lg" />
                   <button 
                     className={cn(
                       "absolute top-2 right-2 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center transition-colors",
-                      favs.includes(ex.id) ? "text-yellow-400" : "text-white/40"
+                      favs.includes(ex.id) ? "text-yellow-400" : "text-text-muted/40"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1110,7 +1185,7 @@ export default function App() {
                 onClick={() => setCtxDay(day)}
                 className={cn(
                   "py-3 rounded-2xl text-xs font-bold transition-all border",
-                  ctxDay === day ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-white/10 text-text-muted"
+                  ctxDay === day ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
                 )}
               >
                 {day === 'Todos' ? 'Todos' : day.slice(0, 3)}
@@ -1121,7 +1196,7 @@ export default function App() {
             onClick={() => setCtxDay('CORE')}
             className={cn(
               "w-full py-3 rounded-2xl text-xs font-bold transition-all border",
-              ctxDay === 'CORE' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-white/10 text-text-muted"
+              ctxDay === 'CORE' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
             )}
           >
             CORE
@@ -1151,17 +1226,14 @@ export default function App() {
 
             <div className="space-y-3">
               {ctxDay === 'Todos' ? (
-                <div className="text-center py-8 border border-dashed border-white/10 rounded-2xl opacity-60 bg-accent/5">
+                <div className="text-center py-8 border border-dashed border-border rounded-2xl opacity-60 bg-accent/5">
                   <p className="text-xs font-bold text-accent-light">Modo "Todos los días" activo</p>
                   <p className="text-[10px] mt-1 text-text-muted px-4">Los ejercicios que agregues se copiarán automáticamente a todos los días de la semana.</p>
                 </div>
               ) : (
                 <>
                   {(ctxRoutine?.days[ctxDay]?.exercises || []).map((ex, idx) => (
-                    <div key={ex.id} className="bg-bg-soft border border-white/5 rounded-2xl p-4 flex items-center gap-4 active:scale-[0.98] transition-transform cursor-pointer" onClick={() => editExerciseInRoutine(ctxDay, idx)}>
-                      <div className="w-12 h-12 bg-bg-card rounded-xl flex items-center justify-center text-2xl">
-                        {ex.emoji}
-                      </div>
+                    <div key={ex.id} className="bg-bg-soft border border-border rounded-2xl p-4 flex items-center gap-4 active:scale-[0.98] transition-transform cursor-pointer" onClick={() => editExerciseInRoutine(ctxDay, idx)}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <h5 className="text-sm font-bold truncate">{ex.name}</h5>
@@ -1188,7 +1260,7 @@ export default function App() {
                     </div>
                   ))}
                   {(ctxRoutine?.days[ctxDay]?.exercises || []).length === 0 && (
-                    <div className="text-center py-8 border border-dashed border-white/10 rounded-2xl opacity-40">
+                    <div className="text-center py-8 border border-dashed border-border rounded-2xl opacity-40">
                       <p className="text-xs">No hay ejercicios para este día</p>
                     </div>
                   )}
@@ -1241,7 +1313,7 @@ export default function App() {
                     className="w-full flex items-center gap-3 group"
                   >
                     <span className="bg-accent text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">{day}</span>
-                    <div className="h-px flex-1 bg-white/5" />
+                    <div className="h-px flex-1 bg-border" />
                     <div className="text-text-muted group-hover:text-accent-light transition-colors">
                       {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </div>
@@ -1302,19 +1374,26 @@ export default function App() {
                               <tr className="text-[9px] uppercase tracking-widest text-text-muted">
                                 <th className="pb-2">Serie</th>
                                 <th className="pb-2">Reps</th>
-                                <th className="pb-2">Peso (kg)</th>
+                                <th className="pb-2">Carga</th>
                               </tr>
                             </thead>
                             <tbody className="text-sm font-bold">
                               {ex.series.map((s, i) => (
-                                <tr key={i} className="border-t border-white/5">
+                                <tr key={i} className="border-t border-border">
                                   <td className="py-2 text-text-muted font-normal">{i + 1}</td>
                                   <td className="py-2">{s.reps || '—'}</td>
-                                  <td className="py-2">{s.weight || '—'}</td>
+                                  <td className="py-2">{s.weight ? `${s.weight} ${s.unit || 'kg'}` : '—'}</td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
+                          {ex.note && (
+                            <div className="mt-4 pt-3 border-t border-border">
+                              <p className="text-[10px] text-text-muted leading-relaxed italic">
+                                <span className="font-bold uppercase not-italic mr-1">Nota:</span> {ex.note}
+                              </p>
+                            </div>
+                          )}
                         </Card>
                       </div>
                     ))}
@@ -1328,7 +1407,7 @@ export default function App() {
                           setReturnToDetail(true);
                           setScreen('select-muscle');
                         }}
-                        className="w-full py-4 rounded-2xl border border-dashed border-white/10 text-accent-light text-xs font-bold flex items-center justify-center gap-2 hover:bg-accent/5 transition-colors"
+                        className="w-full py-4 rounded-2xl border border-dashed border-border text-accent-light text-xs font-bold flex items-center justify-center gap-2 hover:bg-accent/5 transition-colors"
                       >
                         <Plus size={14} /> Agregar Ejercicio a {day}
                       </button>
@@ -1387,7 +1466,7 @@ export default function App() {
                   onClick={() => setCtxDetailId(k)}
                   className={cn(
                     "px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all",
-                    ctxDetailId === k ? "bg-accent text-white" : "bg-bg-card text-text-muted border border-white/10"
+                    ctxDetailId === k ? "bg-accent text-white" : "bg-bg-card text-text-muted border border-border"
                   )}
                 >
                   {history[k].exerciseName}
@@ -1408,7 +1487,7 @@ export default function App() {
                             <stop offset="95%" stopColor="#6C63FF" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                         <XAxis 
                           dataKey="date" 
                           hide 
@@ -1421,7 +1500,7 @@ export default function App() {
                           tickFormatter={(val) => `${val}kg`}
                         />
                         <Tooltip 
-                          contentStyle={{ backgroundColor: '#1E1E35', border: 'none', borderRadius: '12px', fontSize: '12px' }}
+                          contentStyle={{ backgroundColor: 'var(--bg-card)', border: 'none', borderRadius: '12px', fontSize: '12px', color: 'var(--text)' }}
                         />
                         <Area type="monotone" dataKey="maxWeight" stroke="#6C63FF" fillOpacity={1} fill="url(#colorWeight)" strokeWidth={2} />
                       </AreaChart>
@@ -1432,7 +1511,7 @@ export default function App() {
                 <div className="space-y-3">
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">Historial de Sesiones</h4>
                   {data.entries.slice().reverse().map((e, i) => (
-                    <div key={i} className="flex items-center justify-between p-4 bg-bg-soft rounded-2xl border border-white/5">
+                    <div key={i} className="flex items-center justify-between p-4 bg-bg-soft rounded-2xl border border-border">
                       <span className="text-xs text-text-muted font-semibold">{friendlyDate(e.date)}</span>
                       <div className="text-right">
                         <div className="text-sm font-bold">{e.maxWeight}kg <span className="text-text-muted font-normal">max</span></div>
@@ -1492,12 +1571,12 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                  className="bg-bg-card border border-border rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
                 >
                   <div className="p-8 space-y-8 text-center">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-bold">Cronómetro</h3>
-                      <button onClick={() => setShowStopwatch(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                      <button onClick={() => setShowStopwatch(false)} className="p-2 hover:bg-bg-soft rounded-full transition-colors">
                         <X size={20} />
                       </button>
                     </div>
@@ -1544,12 +1623,12 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl"
+                  className="bg-bg-card border border-border rounded-[32px] w-full max-w-md overflow-hidden shadow-2xl"
                 >
                   <div className="p-8 space-y-6">
                     <div className="flex items-center justify-between">
                       <h3 className="text-xl font-bold">Ejercicio Manual</h3>
-                      <button onClick={() => setShowManualModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                      <button onClick={() => setShowManualModal(false)} className="p-2 hover:bg-bg-soft rounded-full transition-colors">
                         <X size={20} />
                       </button>
                     </div>
@@ -1560,7 +1639,7 @@ export default function App() {
                         <input 
                           type="text"
                           autoFocus
-                          className="w-full bg-bg-soft border border-white/10 rounded-2xl px-5 py-4 text-base text-white outline-none focus:border-accent"
+                          className="w-full bg-bg-soft border border-border rounded-2xl px-5 py-4 text-base text-text outline-none focus:border-accent"
                           placeholder="Ej: Press de Banca con Cadenas"
                           value={manualExName}
                           onChange={(e) => setManualExName(e.target.value)}
@@ -1625,14 +1704,14 @@ export default function App() {
                           onClick={() => setProfile(prev => prev ? { ...prev, sex: 'M' } : null)}
                           className={cn(
                             "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                            profile?.sex === 'M' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-white/10 text-text-muted"
+                            profile?.sex === 'M' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
                           )}
                         >♂ Masc</button>
                         <button 
                           onClick={() => setProfile(prev => prev ? { ...prev, sex: 'F' } : null)}
                           className={cn(
                             "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                            profile?.sex === 'F' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-white/10 text-text-muted"
+                            profile?.sex === 'F' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
                           )}
                         >♀ Fem</button>
                       </div>
@@ -1667,12 +1746,12 @@ export default function App() {
                       </div>
                     </div>
                     
-                    <div className="grid grid-cols-3 border-t border-white/5">
-                      <div className="p-4 text-center border-r border-white/5">
+                    <div className="grid grid-cols-3 border-t border-border">
+                      <div className="p-4 text-center border-r border-border">
                         <div className="font-display text-3xl text-accent-light">{profile?.weight}</div>
                         <div className="text-[9px] text-text-muted uppercase font-bold">Peso (kg)</div>
                       </div>
-                      <div className="p-4 text-center border-r border-white/5">
+                      <div className="p-4 text-center border-r border-border">
                         <div className="font-display text-3xl text-accent-light">{profile?.height}</div>
                         <div className="text-[9px] text-text-muted uppercase font-bold">Altura (cm)</div>
                       </div>
@@ -1685,7 +1764,7 @@ export default function App() {
                     </div>
                     
                     {profile && (
-                      <div className="px-6 py-3 bg-white/5 border-t border-white/5 flex items-center justify-between">
+                      <div className="px-6 py-3 bg-bg-card/30 border-t border-border flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-widest text-text-muted">Estado IMC</span>
                         <span className={cn("text-[10px] font-bold uppercase tracking-widest", getBMICategory(Number(calculateBMI(profile.weight, profile.height))).color)}>
                           {getBMICategory(Number(calculateBMI(profile.weight, profile.height))).label}
@@ -1693,6 +1772,35 @@ export default function App() {
                       </div>
                     )}
                   </Card>
+
+                  <div className="space-y-4 mt-6">
+                    <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-muted px-1">Preferencias</h3>
+                    <Card className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent-light">
+                            {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold">Modo {theme === 'dark' ? 'Oscuro' : 'Claro'}</p>
+                            <p className="text-[10px] text-text-muted">Cambiar el tema de la aplicación</p>
+                          </div>
+                        </div>
+                        <button 
+                          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                          className={cn(
+                            "w-12 h-6 rounded-full p-1 transition-all duration-300 relative border",
+                            theme === 'dark' ? "bg-accent border-accent" : "bg-bg-card border-border"
+                          )}
+                        >
+                          <div className={cn(
+                            "w-4 h-4 rounded-full transition-all duration-300",
+                            theme === 'dark' ? "translate-x-6 bg-white" : "translate-x-0 bg-accent"
+                          )} />
+                        </button>
+                      </div>
+                    </Card>
+                  </div>
 
                   <div className="space-y-3">
                     <Button 
@@ -1717,7 +1825,7 @@ export default function App() {
                       <Trash2 size={18} /> Borrar todos los datos
                     </Button>
 
-                    <div className="pt-8 border-t border-white/5">
+                    <div className="pt-8 border-t border-border">
                       <a href="/vanilla-v2/index.html" className="block text-center text-[10px] text-accent uppercase tracking-widest hover:underline">
                         Cambiar a Versión Vanilla PWA (v2)
                       </a>
@@ -1734,7 +1842,7 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                  className="bg-bg-card border border-border rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
                 >
                   <div className="p-8 space-y-6 text-center">
                     <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mx-auto">
@@ -1769,7 +1877,7 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                  className="bg-bg-card border border-border rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
                 >
                   <div className="p-8 space-y-6 text-center">
                     <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mx-auto">
@@ -1777,7 +1885,7 @@ export default function App() {
                     </div>
                     <div className="space-y-2">
                       <h3 className="text-xl font-bold">¿Eliminar Día?</h3>
-                      <p className="text-xs text-text-muted leading-relaxed">Se borrarán todos los ejercicios del día <span className="text-white font-bold">{showDeleteDayConfirm.day}</span>.</p>
+                      <p className="text-xs text-text-muted leading-relaxed">Se borrarán todos los ejercicios del día <span className="text-text font-bold">{showDeleteDayConfirm.day}</span>.</p>
                     </div>
                     <div className="flex flex-col gap-3">
                       <Button variant="danger" size="lg" onClick={() => deleteDayFromRoutine(showDeleteDayConfirm.day)}>
@@ -1800,7 +1908,7 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.9, y: 20 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                  className="bg-bg-card border border-white/10 rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
+                  className="bg-bg-card border border-border rounded-[32px] w-full max-w-xs overflow-hidden shadow-2xl"
                 >
                   <div className="p-8 space-y-6 text-center">
                     <div className="w-16 h-16 bg-danger/10 text-danger rounded-full flex items-center justify-center mx-auto">

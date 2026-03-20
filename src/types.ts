@@ -13,6 +13,7 @@ export interface Exercise {
 export interface Series {
   reps: string;
   weight: string;
+  unit?: 'kg' | 'min' | 'seg';
 }
 
 export interface RoutineExercise {

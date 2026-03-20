@@ -4,9 +4,23 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GymBros React PWA</title>
-    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
-    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <!-- Dynamic SVG Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cstyle%3E @media (prefers-color-scheme: dark) %7B .icon %7B fill: %23ffffff; %7D %7D @media (prefers-color-scheme: light) %7B .icon %7B fill: %236C63FF; %7D %7D .icon %7B fill: %236C63FF; %7D %3C/style%3E%3Cpath class='icon' d='M26 12h-2V8a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v4H6a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2zM10 8h12v4H10V8zm12 16H10v-4h12v4zm4-6H6v-4h20v4z'/%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" id="apple-icon" href="/icons/icon-192.png" />
     <link rel="manifest" href="/manifest.json" />
+    <script>
+      // Update apple-touch-icon based on theme
+      function updateAppleIcon() {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const appleIcon = document.getElementById('apple-icon');
+        if (appleIcon) {
+          // Use dark mode icons if theme is dark
+          appleIcon.href = isDark ? '/icons/icon-192dark.png' : '/icons/icon-192.png';
+        }
+      }
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateAppleIcon);
+      updateAppleIcon();
+    </script>
   </head>
   <body>
     <div id="root"></div>
