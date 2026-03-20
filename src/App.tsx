@@ -775,8 +775,8 @@ export default function App() {
   );
 
   const renderRegister = () => (
-    <div className="min-h-screen p-6 flex flex-col justify-center items-center space-y-8 text-center max-w-xs mx-auto">
-      <div className="w-full flex items-center justify-between mb-4">
+    <div className="min-h-screen p-6 flex flex-col items-center py-12 w-full max-w-md mx-auto">
+      <div className="w-full flex items-center justify-between mb-8">
         <button onClick={() => setScreen('welcome')} className="text-accent-light flex items-center gap-1">
           <ChevronLeft size={20} /> Atrás
         </button>
@@ -784,45 +784,54 @@ export default function App() {
         <div className="w-12" />
       </div>
 
-      <div className="space-y-2">
-        <div className="text-6xl">🏋️</div>
-        <p className="text-text-muted text-sm">Contanos sobre vos para personalizar tu experiencia.</p>
+      <div className="space-y-4 text-center mb-8">
+        <div className="text-7xl animate-bounce">🏋️</div>
+        <p className="text-text-muted text-sm px-4">Contanos sobre vos para personalizar tu experiencia.</p>
       </div>
 
       <div className="space-y-6 w-full">
-        <Input id="reg-name" label="¿CÓMO TE LLAMÁS?" placeholder="Tu nombre" />
-        <div className="grid grid-cols-2 gap-4">
-          <Input id="reg-age" label="EDAD" type="number" placeholder="25" />
-          <div className="space-y-2 text-left">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">SEXO</label>
-            <div className="grid grid-cols-2 gap-2">
-              <button 
-                onClick={() => setRegSex('M')}
-                className={cn(
-                  "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                  regSex === 'M' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-border text-text-muted"
-                )}
-              >
-                ♂ Masc
-              </button>
-              <button 
-                onClick={() => setRegSex('F')}
-                className={cn(
-                  "border rounded-2xl py-3 text-sm font-semibold transition-all",
-                  regSex === 'F' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-border text-text-muted"
-                )}
-              >
-                ♀ Fem
-              </button>
+        <div className="space-y-6">
+          <Input id="reg-name" label="¿CÓMO TE LLAMÁS?" placeholder="Tu nombre" />
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Input id="reg-age" label="EDAD" type="number" placeholder="25" />
+            
+            <div className="space-y-2 text-left">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">SEXO</label>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setRegSex('M')}
+                  className={cn(
+                    "flex-1 border rounded-2xl py-3.5 text-sm font-semibold transition-all flex items-center justify-center gap-2",
+                    regSex === 'M' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-border text-text-muted"
+                  )}
+                >
+                  ♂ Masc
+                </button>
+                <button 
+                  onClick={() => setRegSex('F')}
+                  className={cn(
+                    "flex-1 border rounded-2xl py-3.5 text-sm font-semibold transition-all flex items-center justify-center gap-2",
+                    regSex === 'F' ? "bg-accent border-accent text-white shadow-[0_0_15px_rgba(108,99,255,0.4)]" : "bg-bg-card border-border text-text-muted"
+                  )}
+                >
+                  ♀ Fem
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Input id="reg-weight" label="PESO (KG)" type="number" placeholder="75" />
-          <Input id="reg-height" label="ALTURA (CM)" type="number" placeholder="175" />
+
+          <div className="grid grid-cols-2 gap-6">
+            <Input id="reg-weight" label="PESO (KG)" type="number" placeholder="75" />
+            <Input id="reg-height" label="ALTURA (CM)" type="number" placeholder="175" />
+          </div>
         </div>
         
-        <Button size="xl" className="mt-8" onClick={handleRegister}>Empezar a entrenar 💪</Button>
+        <div className="pt-4">
+          <Button size="xl" className="w-full" onClick={handleRegister}>
+            Empezar a entrenar 💪
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -1353,13 +1362,13 @@ export default function App() {
       </div>
       
       {isEditingProfile ? (
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 max-w-md mx-auto w-full">
           <Input 
             label="Nombre" 
             value={profile?.name || ''} 
             onChange={(e) => setProfile(prev => prev ? { ...prev, name: e.target.value } : null)}
           />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <Input 
               label="Edad" 
               type="number" 
@@ -1370,25 +1379,25 @@ export default function App() {
               <label className="text-[10px] font-bold uppercase tracking-widest text-text-muted px-1">
                 Sexo
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="flex gap-2">
                 <button 
                   onClick={() => setProfile(prev => prev ? { ...prev, sex: 'M' } : null)}
                   className={cn(
-                    "border rounded-2xl py-3 text-sm font-semibold transition-all",
+                    "flex-1 border rounded-2xl py-3.5 text-sm font-semibold transition-all",
                     profile?.sex === 'M' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
                   )}
                 >♂ Masc</button>
                 <button 
                   onClick={() => setProfile(prev => prev ? { ...prev, sex: 'F' } : null)}
                   className={cn(
-                    "border rounded-2xl py-3 text-sm font-semibold transition-all",
+                    "flex-1 border rounded-2xl py-3.5 text-sm font-semibold transition-all",
                     profile?.sex === 'F' ? "bg-accent/10 border-accent text-accent-light" : "bg-bg-card border-border text-text-muted"
                   )}
                 >♀ Fem</button>
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             <Input 
               label="Peso (kg)" 
               type="number" 
@@ -1402,9 +1411,11 @@ export default function App() {
               onChange={(e) => setProfile(prev => prev ? { ...prev, height: parseInt(e.target.value) || 0 } : null)}
             />
           </div>
-          <Button size="xl" className="mt-4" onClick={() => setIsEditingProfile(false)}>
-            Guardar Cambios
-          </Button>
+          <div className="pt-4">
+            <Button size="xl" className="w-full" onClick={() => setIsEditingProfile(false)}>
+              Guardar Cambios
+            </Button>
+          </div>
         </div>
       ) : (
         <>
